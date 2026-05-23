@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Essay Practice — AI for Sustainable Leadership</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Per-block accent palette (one per block) */
+  --b1:#5b6cff;  --b1-soft:#eef0ff;   /* indigo */
+  --b2:#d97706;  --b2-soft:#fef3c7;   /* amber  */
+  --b3:#0d9488;  --b3-soft:#ccfbf1;   /* teal   */
+  --b4:#e11d48;  --b4-soft:#ffe4e6;   /* rose   */
+  --b5:#15803d;  --b5-soft:#dcfce7;   /* green  */
+  --b6:#7c3aed;  --b6-soft:#ede9fe;   /* purple */
+
+  --bg:#fbfaf7; --panel:#fff; --ink:#1c1c1f; --body:#2d2d33;
+  --muted:#6b7280; --line:#e8e6df; --soft:#f3f1ec;
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Inter', system-ui, sans-serif;
+  --maxw:840px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{font-family:var(--serif);background:var(--bg);color:var(--body);line-height:1.65;font-size:18px;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+
+.nav{position:sticky;top:0;z-index:50;background:rgba(251,250,247,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);font-family:var(--sans)}
+.nav-inner{max-width:var(--maxw);margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.nav-brand{font-family:var(--serif);font-weight:500;font-size:.98rem;color:var(--ink);text-decoration:none}
+.nav-brand i{font-style:italic;color:var(--muted);font-weight:400}
+.nav-jumps{display:flex;flex-wrap:wrap;gap:4px;font-family:var(--sans);font-size:.78rem;font-weight:600}
+.nav-jump{padding:4px 8px;border-radius:5px;text-decoration:none;color:var(--muted);transition:all .15s}
+.nav-jump:hover{background:var(--soft);color:var(--ink)}
+.nav-jump.b1:hover{background:var(--b1-soft);color:var(--b1)}
+.nav-jump.b2:hover{background:var(--b2-soft);color:var(--b2)}
+.nav-jump.b3:hover{background:var(--b3-soft);color:var(--b3)}
+.nav-jump.b4:hover{background:var(--b4-soft);color:var(--b4)}
+.nav-jump.b5:hover{background:var(--b5-soft);color:var(--b5)}
+.nav-jump.b6:hover{background:var(--b6-soft);color:var(--b6)}
+
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+.hero{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+.hero-eyebrow{font-family:var(--sans);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:14px}
+.hero h1{font-family:var(--serif);font-size:clamp(2rem,5vw,3rem);font-weight:500;font-variation-settings:"opsz" 144;line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin-bottom:14px}
+.hero h1 em{font-style:italic;color:var(--muted);font-weight:400}
+.hero .deck{font-size:1.08rem;color:var(--body);max-width:600px;margin-bottom:24px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px;font-family:var(--sans);font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+.legend b{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink)}
+.legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+.q{padding:48px 0 32px;border-bottom:1px solid var(--line);scroll-margin-top:72px}
+.q-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:14px}
+.q-num{flex-shrink:0;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-weight:700;font-size:1rem;color:#fff}
+.q[data-b="1"] .q-num{background:var(--b1)}
+.q[data-b="2"] .q-num{background:var(--b2)}
+.q[data-b="3"] .q-num{background:var(--b3)}
+.q[data-b="4"] .q-num{background:var(--b4)}
+.q[data-b="5"] .q-num{background:var(--b5)}
+.q[data-b="6"] .q-num{background:var(--b6)}
+.q-meta{flex:1}
+.q-block{font-family:var(--sans);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.q[data-b="1"] .q-block{color:var(--b1)}
+.q[data-b="2"] .q-block{color:var(--b2)}
+.q[data-b="3"] .q-block{color:var(--b3)}
+.q[data-b="4"] .q-block{color:var(--b4)}
+.q[data-b="5"] .q-block{color:var(--b5)}
+.q[data-b="6"] .q-block{color:var(--b6)}
+.q-text{font-family:var(--serif);font-size:1.32rem;font-weight:500;color:var(--ink);line-height:1.35;letter-spacing:-.01em}
+
+.a{margin-top:18px}
+.a-label{font-family:var(--sans);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:24px 0 10px}
+.a-lead{font-family:var(--serif);font-size:1.05rem;color:var(--body);margin-bottom:18px}
+.a-lead strong{color:var(--ink);font-weight:600}
+.a p{margin-bottom:16px}
+.a p strong{color:var(--ink);font-weight:600}
+.a ul,.a ol{margin:0 0 16px 22px;font-family:var(--sans);font-size:.96rem}
+.a li{margin-bottom:6px}
+.a li strong{color:var(--ink)}
+
+.diagram{margin:22px 0;padding:20px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.diagram svg{width:100%;height:auto;display:block}
+.diagram-cap{font-family:var(--sans);font-size:.8rem;color:var(--muted);font-style:italic;margin-top:10px;text-align:center}
+
+.box{margin:22px 0;padding:18px 22px;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.box h5{font-family:var(--sans);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);margin-bottom:10px}
+.box ul{margin-left:18px;font-family:var(--sans);font-size:.92rem}
+.box li{margin-bottom:5px}
+.box.case{background:var(--soft)}
+.q[data-b="1"] .box.case{background:var(--b1-soft)}
+.q[data-b="2"] .box.case{background:var(--b2-soft)}
+.q[data-b="3"] .box.case{background:var(--b3-soft)}
+.q[data-b="4"] .box.case{background:var(--b4-soft)}
+.q[data-b="5"] .box.case{background:var(--b5-soft)}
+.q[data-b="6"] .box.case{background:var(--b6-soft)}
+.q[data-b="1"] .box.case h5{color:var(--b1)}
+.q[data-b="2"] .box.case h5{color:var(--b2)}
+.q[data-b="3"] .box.case h5{color:var(--b3)}
+.q[data-b="4"] .box.case h5{color:var(--b4)}
+.q[data-b="5"] .box.case h5{color:var(--b5)}
+.q[data-b="6"] .box.case h5{color:var(--b6)}
+
+.cite-row{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 4px}
+.cite{display:inline-block;padding:3px 9px;border-radius:4px;font-family:var(--sans);font-size:.74rem;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--ink)}
+
+footer{padding:48px 0;text-align:center;color:var(--muted);font-family:var(--sans);font-size:.84rem;background:var(--bg);border-top:1px solid var(--line)}
+
+@media (max-width:600px){body{font-size:17px}.hero{padding:40px 0 28px}.q{padding:36px 0 24px}.q-text{font-size:1.15rem}.q-num{width:38px;height:38px;font-size:.9rem}.nav-jumps{font-size:.7rem;gap:2px}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">Essay practice <i>· AI for Sustainable Leadership</i></a>
+    <div class="nav-jumps">
+      <a class="nav-jump b1" href="#q1">Q1</a>
+      <a class="nav-jump b1" href="#q2">Q2</a>
+      <a class="nav-jump b1" href="#q3">Q3</a>
+      <a class="nav-jump b2" href="#q4">Q4</a>
+      <a class="nav-jump b2" href="#q5">Q5</a>
+      <a class="nav-jump b2" href="#q6">Q6</a>
+      <a class="nav-jump b3" href="#q7">Q7</a>
+      <a class="nav-jump b3" href="#q8">Q8</a>
+      <a class="nav-jump b3" href="#q9">Q9</a>
+      <a class="nav-jump b4" href="#q10">Q10</a>
+      <a class="nav-jump b4" href="#q11">Q11</a>
+      <a class="nav-jump b4" href="#q12">Q12</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="container">
+    <div class="hero-eyebrow">Essay practice · open-ended questions</div>
+    <h1>12 questions <em>— AI for Sustainable Leadership</em></h1>
+    <p class="deck">Twelve scenario-based essay prompts in the style of the mock exam Q3.1 (RetailNow). Each answer follows the same skeleton: italic lead naming the core framework, bulleted components, a "why it matters" box, a class-example anchor, and author cites — the structure a 5/5 answer needs under exam pressure.</p>
+    <div class="legend">
+      <b><span class="dot" style="background:var(--b1)"></span>Block 1 · Sustainability &amp; Ethics</b>
+      <b><span class="dot" style="background:var(--b2)"></span>Block 2 · Designing AI Organizations</b>
+      <b><span class="dot" style="background:var(--b3)"></span>Block 3 · People &amp; Leadership</b>
+      <b><span class="dot" style="background:var(--b4)"></span>Block 4 · Executing, Scaling, Governing</b>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ Q1 — Block 1 · Hahn et al. integrative sustainability ═══════════ -->
+<article class="q" id="q1" data-b="1">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">1</div>
+      <div class="q-meta">
+        <div class="q-block">Block 1 · Sustainability tensions</div>
+        <div class="q-text">DataHarvest, a 4,000-employee European agritech firm, has deployed an AI yield-prediction platform that runs on GPU clusters in three data centres in drought-prone regions. The system has cut farmer input costs by 18% and improved harvest planning, but local water authorities have flagged the cooling demand and an NGO has documented that data-labelling work is outsourced to under-paid annotators in Kenya. The CEO argues the platform is a net positive because economic benefits clearly outweigh local externalities. Using the integrative sustainability framework, analyse this situation and recommend how the leadership team should reframe its decision.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">The integrative answer rests on <strong>Hahn et al.'s (2014) Integrative Sustainability Framework</strong>: real sustainability is the simultaneous management of economic, environmental and social tensions across three levels and across time and space — not a net-benefit calculation.</p>
+
+      <ul>
+        <li><strong>3 dimensions in tension</strong> — economic (input savings), environmental (water and energy stress), social (ghost-work conditions in Kenya) — they cannot be traded off as if they were commensurable.</li>
+        <li><strong>3 levels simultaneously</strong> — individual (annotators' livelihoods, farmers' decisions), organizational (DataHarvest's strategy, costs), systemic (regional water table, global labour markets).</li>
+        <li><strong>Temporal dependency</strong> — present GPU build-out locks in energy demand for years and the outsourcing contract entrenches future labour patterns; today's "savings" encode tomorrow's liabilities.</li>
+        <li><strong>Spatial dependency</strong> — Kenya, the drought regions and the Brussels HQ are co-produced, not separable; the "we're just providing tools" framing misrepresents DataHarvest's role.</li>
+        <li><strong>Leadership move</strong> — reduce tensions long-term, decrease the number of trade-offs, align stakeholder interests; "exceed narrowly, meet broadly" rather than maximise one dimension.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>The trap is the CEO's net-benefit argument: it collapses three irreducible dimensions into one balance sheet. Hahn et al. reject this — sustainable leadership accepts tensions, maps them across levels and time, and engineers structural responses (renewable cooling, fair-wage labelling contracts, farmer voice in product design) rather than offsetting one harm with another gain.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Anchor cite</h5>
+        <ul>
+          <li><strong>Crawford (2021) AI ecosystem map</strong> — pairs naturally: name natural resources (water, minerals), deployment, impact &amp; waste, recovery — DataHarvest's harms span the full chain.</li>
+          <li><strong>Mock Q2.1 (hiring-tool bias)</strong> — same logic: management's "neutrality" claim misrepresents the spatial dependency.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Hahn et al. (2014)</span>
+        <span class="cite">Crawford (2021)</span>
+        <span class="cite">Gambacorta &amp; Shreeti (2025)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q2 — Block 1 · EU AI Act + Floridi & Cowls ═══════════ -->
+<article class="q" id="q2" data-b="1">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">2</div>
+      <div class="q-meta">
+        <div class="q-block">Block 1 · EU AI Act &amp; ethics</div>
+        <div class="q-text">EduFlow, an EdTech start-up with 90 employees, sells an AI tutor to European secondary schools. A new module uses webcam-based "engagement detection" to flag students who appear distracted, with the scores fed into teachers' dashboards. The CTO proposes adding a "human-in-the-loop" — teachers see the AI's suggestions but always have the final say — and argues this downgrades the system to limited-risk. The CEO wants to launch in three months across Spain, France and Germany. Using the EU AI Act and one ethics framework, advise the leadership team on the regulatory classification and the ethical principles they must operationalise before launch.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">The classification is set by the <strong>EU AI Act risk tiers</strong>: emotion recognition in education is in the unacceptable-risk band, and a human-in-the-loop does not move a system down a tier.</p>
+
+      <ul>
+        <li><strong>Unacceptable risk</strong> — emotion recognition in workplaces and education is explicitly banned; the engagement-detection module falls here, not in limited-risk.</li>
+        <li><strong>High risk (adjacent)</strong> — even a non-emotion AI tutor used in education hits "high-risk" obligations: conformity assessment, risk management, human oversight, logging, transparency.</li>
+        <li><strong>Limited risk</strong> — only the conversational-tutor layer (chatbot) might qualify, and only with explicit disclosure that the user is interacting with AI.</li>
+        <li><strong>The trap</strong> — HITL is a required safeguard for high-risk systems; it does not downgrade the tier. The CTO's argument is wrong on the law.</li>
+        <li><strong>Floridi &amp; Cowls (2019) five principles</strong> — Beneficence, Non-maleficence, Autonomy, Justice, Explicability (the enabler) — every launch decision should be defensible against all five.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>Two moves win this answer: (1) name unacceptable-risk for emotion recognition and refuse the HITL downgrade myth; (2) layer Floridi &amp; Cowls so the answer is not just legal but ethical — explicability is the precondition that lets students and parents exercise autonomy (consent, contestation) and lets teachers actually use oversight rather than rubber-stamp scores.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>Mock Q1.1 (hiring AI)</strong> — recruitment AI = HIGH risk; same logic: human override does NOT downgrade the tier.</li>
+          <li><strong>RippleHire</strong> — counter-example of ethical AI in HR (explainability, bias audits, candidate experience).</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">EU AI Act (2024)</span>
+        <span class="cite">Floridi &amp; Cowls (2019)</span>
+        <span class="cite">OECD AI Principles</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q3 — Block 1 · Compare leadership theories ═══════════ -->
+<article class="q" id="q3" data-b="1">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">3</div>
+      <div class="q-meta">
+        <div class="q-block">Block 1 · Leadership theories for AI</div>
+        <div class="q-text">NordBank, a 12,000-employee retail bank, is rolling out a generative-AI assistant for loan officers. Customer-facing staff feel uneasy: some fear automation; others worry about bias and recommend pausing the rollout. The CHRO is debating which leadership style the senior team should publicly model — transformational, servant, or ethical leadership — to carry the rollout without breaking trust. Compare the three approaches in this context and recommend which the leadership team should anchor on, justifying with the trade-offs of all three.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">No single style wins; the recommendation is a layered answer using <strong>Brown et al.'s (2005) ethical leadership</strong> as the climate anchor, supplemented by <strong>Bass &amp; Riggio (2006) transformational</strong> for vision and <strong>Dierendonck &amp; Nuijten (2011) servant</strong> for staff voice.</p>
+
+      <ul>
+        <li><strong>Transformational (Bass &amp; Riggio, 2006)</strong> — the 4 I's: Idealized influence, Inspirational motivation, Intellectual stimulation, Individualized consideration. STRONG for vision-setting (why AI matters). RISK: charisma can mask ethical thinness if vision is decoupled from operational ethics.</li>
+        <li><strong>Servant (Dierendonck &amp; Nuijten, 2011)</strong> — empowerment, stewardship, humility, courage, accountability, authenticity, standing back. STRONG for legitimising staff concerns about bias. RISK: can be slow to act on competitive pressure.</li>
+        <li><strong>Ethical (Brown et al., 2005)</strong> — "moral person" (traits) + "moral manager" (communicates, rewards, disciplines). STRONG for setting the climate where flagging AI bias is normal. RISK: needs structures behind it (RACI, audits) or it becomes rhetorical.</li>
+        <li><strong>Recommendation</strong> — ethical leadership as the climate anchor (it's about culture, not personality); transformational for the launch communication; servant for the listening structures (forums, AI ethics committee).</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>The trap is to pick one. The exam reward is to name the strengths and limits of each and show that they are layered: vision (transformational) + culture (ethical) + voice (servant). Add <strong>Edmondson (2020) moral courage</strong> and <strong>Czakert &amp; Wietrak (2025)</strong> for the "new leadership for AI" voice that argues ethics must be foundational, not added on top.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>Musk vs OpenAI (S5)</strong> — vision without ethical structure becomes innovation theatre and governance crisis.</li>
+          <li><strong>ManCo (S13)</strong> — middle-manager doubt + lack of psychological safety stalled GenAI adoption; ethical leadership is what fixes that climate.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Bass &amp; Riggio (2006)</span>
+        <span class="cite">Dierendonck &amp; Nuijten (2011)</span>
+        <span class="cite">Brown et al. (2005)</span>
+        <span class="cite">Edmondson (2020)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q4 — Block 2 · Make/Buy/Partner ═══════════ -->
+<article class="q" id="q4" data-b="2">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">4</div>
+      <div class="q-meta">
+        <div class="q-block">Block 2 · Sourcing AI capabilities</div>
+        <div class="q-text">MediGen, a 600-person specialty pharma company, wants an AI platform to support its drug-discovery pipeline. The platform would screen molecular candidates and predict toxicity — work that today consumes 60% of researcher time and is the firm's core scientific moat. Senior R&amp;D leadership argues this is too strategic to outsource; the CFO points out the firm has no ML talent, that hiring a 30-person ML team would take 18 months, and that two specialised vendors and one university research lab have approached MediGen with proposals. Should MediGen build in-house, license a third-party platform, or co-develop the capability? Justify your answer by analysing the advantages and disadvantages of all three options in this context.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">The right call is <strong>PARTNER (co-develop)</strong> under the <strong>Make / Buy / Partner sourcing framework</strong>: the capability is too strategic to buy and too talent-intensive to make alone in time.</p>
+
+      <ul>
+        <li><strong>MAKE (build in-house)</strong> — ADVANTAGES: full control, deep contextual learning, protects the scientific moat, adaptive governance, possible differentiation. DISADVANTAGES: 18-month talent ramp, very expensive, risk of obsolescence, MediGen has no ML foundation to absorb the hire.</li>
+        <li><strong>BUY (license a vendor)</strong> — ADVANTAGES: fast deployment, lower upfront, vendor takes infra risk, lets the firm focus on chemistry. DISADVANTAGES: capability erosion (the moat), opacity of the model, vendor lock-in, switching costs, regulatory exposure (FDA needs explainability), ethical delegation without control.</li>
+        <li><strong>PARTNER (co-develop with university or specialist firm)</strong> — ADVANTAGES: shared experimentation, complementary capabilities (MediGen's domain data + partner's ML), cross-domain learning, flexibility, IP can be negotiated. DISADVANTAGES: complex management, power asymmetries, ambiguous governance, IP/data lock-in, different priorities.</li>
+        <li><strong>Diagnosis</strong> — core/strategic capability + no internal talent + need to retain learning + IP-sensitive = PARTNER, structured to transfer capability over time (build through the partnership).</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>Mirror mock Q3.1: name the strategic diagnosis first (core vs non-core; time; talent; values), then walk all three options' trade-offs, then commit. The 5/5 answer makes the partner structure explicit: phased IP transfer, joint governance, exit clauses, capability hand-off plan — i.e. PARTNER designed so that in three years MediGen could MAKE.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>RetailNow (mock Q3.1)</strong> — opposite diagnosis: non-core (customer service) + speed + no infra = BUY a vendor chatbot.</li>
+          <li><strong>Bouquet et al. (2026) AI Innovation 4 Paths</strong> — pair with Make/Buy/Partner to give a strategic framing on top of the transactional one.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Make/Buy/Partner (S6)</span>
+        <span class="cite">Bouquet et al. (2026)</span>
+        <span class="cite">Hahn et al. (2014)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q5 — Block 2 · AI Lab Archetypes ═══════════ -->
+<article class="q" id="q5" data-b="2">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">5</div>
+      <div class="q-meta">
+        <div class="q-block">Block 2 · AI Lab archetypes</div>
+        <div class="q-text">GlobalCPG, a 70,000-employee consumer goods multinational, runs AI pilots inside each of its five business units (beauty, food, home care, pet, professional). The CEO complains that pilots rarely scale, that each unit reinvents the same tooling, and that the firm has no coherent external AI narrative. The new Chief AI Officer must choose between three lab structures: a centralized AI Lab reporting to the CEO, keeping decentralized embedded labs in each business unit, or spinning up a venture/incubator lab for breakthrough exploration. Which AI Lab archetype should the CAIO pick, and why? Discuss the trade-offs of all three options.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">Using <strong>AI Lab Archetypes</strong> (S5), the right call is a <strong>centralized lab</strong> as the strategic anchor — but with explicit interfaces back into the business units, because no archetype is superior in the abstract.</p>
+
+      <ul>
+        <li><strong>Centralized Lab</strong> — ADVANTAGES: pools scarce ML talent, standardises tooling, builds shared infrastructure, gives the firm a single external story, clear accountability. DISADVANTAGES: distance from business units, risk of irrelevant pilots, can become a bottleneck.</li>
+        <li><strong>Decentralized / Embedded Lab</strong> — ADVANTAGES: high contextual relevance, fast local iteration, business ownership. DISADVANTAGES: weak coordination, duplicated investment, inconsistent practice, no shared platform — exactly the pain GlobalCPG already has.</li>
+        <li><strong>Venture / Incubator Lab</strong> — ADVANTAGES: start-up logic, speed, external orientation, built for exploration. DISADVANTAGES: not built for incremental improvement, weak hand-back to the core, hard to fund sustainably, can become innovation theatre if it never integrates.</li>
+        <li><strong>Diagnosis</strong> — the pain is scaling and consistency, not exploration; the firm needs the centralised pattern, with embedded "translator" roles in each BU to keep relevance.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>Diagnose the strategic intent first (explore vs exploit, speed vs consistency, local vs global) and then pick. The 5/5 move is to recognise that the archetypes are not exclusive: pair centralised core + light embedded translators is the modern hybrid. Add <strong>Hybrid AI Labs</strong> to argue that alignment with social/ethical objectives must be structural from day one, not added later.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>Musk vs OpenAI (S5)</strong> — venture lab whose mission drift exposed the dangers of an unaccountable incubator at scale.</li>
+          <li><strong>Vertical vs Horizontal AI teams (S4)</strong> — the same speed-vs-consistency tension shows up at the team level — pattern recognition wins points.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">AI Lab Archetypes (S5)</span>
+        <span class="cite">Bouquet et al. (2026)</span>
+        <span class="cite">Hybrid AI Labs (S5)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q6 — Block 2 · Innovation Theatre + Portfolio ═══════════ -->
+<article class="q" id="q6" data-b="2">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">6</div>
+      <div class="q-meta">
+        <div class="q-block">Block 2 · Innovation theatre &amp; portfolio</div>
+        <div class="q-text">SkyAir, a national airline, has announced 28 AI initiatives across customer experience, operations and crew scheduling. The CEO showcases a new "AI Lab" in glossy investor decks; the press loves it. Internally, however, only two pilots have reached production in 18 months, decision rights have not moved, and the same operations VP signs off on every project. A board director asks the CSO to assess whether the AI portfolio is real progress or innovation theatre, and to propose how to manage it differently. How should the CSO diagnose and respond? Use the relevant frameworks.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">The diagnostic is <strong>innovation theatre</strong> (S5): the symbols of innovation (lab, demos, polished decks) without changes to decision rights, incentives or the pipeline; the fix is real <strong>portfolio management</strong> (Kloppenborg &amp; Lanning, 2012) plus portfolio stress-testing.</p>
+
+      <ul>
+        <li><strong>Innovation theatre symptoms</strong> — impressive lab, demo days, bold AI strategy, but decision rights stay concentrated (one VP), incentives still reward short-term exploitation, pilots never reach production.</li>
+        <li><strong>Why it happens</strong> — not deliberate deception; emerges from unresolved tensions (explore/exploit, signalling/operational, long-term/short-term).</li>
+        <li><strong>Portfolio management</strong> — Kloppenborg &amp; Lanning's 5 executive tasks: Identify, Select, Prioritise, Resource, Govern; portfolio mgmt ≠ project mgmt; it allocates across many bets.</li>
+        <li><strong>Portfolio stress-test (NordSteel lenses)</strong> — Cost shock (API/compute +25%?), Regulatory shock (new explainability rules?), Competitive shock (rival foundation model?), Identity shock (what kind of company in 5 years?).</li>
+        <li><strong>Response</strong> — cut the 28 to a prioritised 6-8 with explicit kill criteria; move decision rights closer to BUs; embed the lab in the business; tie portfolio reviews to the stress-test lenses.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>Open with the diagnosis ("this is innovation theatre"), then prove it with the symptoms, then move to the fix. The contrast between theatre and real capability is the writing-prompt that rewards naming both halves: <strong>Hybrid alignment</strong> from S5 (alignment baked in from day one, not bolted on) is the partner concept that distinguishes real from performative AI investment.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>NordSteel (S7)</strong> — the canonical portfolio stress-test exercise; reuse the four lenses verbatim.</li>
+          <li><strong>Musk vs OpenAI (S5)</strong> — bold mission, weak structural alignment → theatre with consequences.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Innovation theatre (S5)</span>
+        <span class="cite">Kloppenborg &amp; Lanning (2012)</span>
+        <span class="cite">NordSteel (S7)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q7 — Block 3 · JD-R + SDT for AI rollout ═══════════ -->
+<article class="q" id="q7" data-b="3">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">7</div>
+      <div class="q-meta">
+        <div class="q-block">Block 3 · Motivation &amp; burnout in AI rollout</div>
+        <div class="q-text">CodeForge, a 1,500-engineer software firm, has rolled out GenAI coding assistants across every team. Six months in, engagement scores have dropped, three senior engineers have resigned citing "becoming AI babysitters," and burnout reports have doubled. Productivity dashboards, however, show output is up 20%. The CHRO must explain to the CEO why motivation and well-being are collapsing despite the productivity gains, and propose interventions. Using two motivation frameworks, diagnose what is happening and recommend a job redesign approach.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">Two frameworks together explain the paradox: <strong>Bakker &amp; Demerouti's (2006/2007) Job Demands–Resources model</strong> diagnoses the burnout, and <strong>Deci &amp; Ryan's Self-Determination Theory</strong> explains why intrinsic motivation evaporates even as output rises.</p>
+
+      <ul>
+        <li><strong>JD-R diagnosis</strong> — DEMANDS up (constant review of AI suggestions, accountability for AI errors, model-drift firefighting); RESOURCES down (less autonomy in how to code, weaker mastery loops, fewer learning moments). Chronic imbalance → stress → burnout.</li>
+        <li><strong>SDT diagnosis</strong> — three psychological needs broken: <em>Autonomy</em> (engineers no longer choose how to solve problems), <em>Competence</em> (the rewarding skill — design and craft — is automated), <em>Relatedness</em> (pair programming displaced by pair-with-AI).</li>
+        <li><strong>Job Characteristics Model (Hackman &amp; Oldham)</strong> — the rollout collapsed skill variety, task identity and feedback; redesign should restore them: rotate AI-heavy and AI-light tasks, give engineers ownership of whole modules end-to-end.</li>
+        <li><strong>Flow (Csikszentmihalyi)</strong> — engineers are now in boredom (high skill × low challenge); redesign should restore the flow zone by giving humans the harder design and integration work.</li>
+        <li><strong>Psychological contract (Rousseau, 1995)</strong> — the implicit promise ("I was hired to think") has broken; address explicitly through dialogue, not only tool tweaks.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>The 5/5 move is to refuse the productivity-up-so-it's-fine framing and explain the mechanism: AI raised demands and lowered resources, broke autonomy and competence, and silently renegotiated the psychological contract. The redesign isn't an HR perk programme — it's a job-content change, governed by SDT + JCM.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>ManCo (S13/14)</strong> — GenAI in R&amp;D ran into exactly this: engineers' demand-resource balance + identity threat stalled adoption.</li>
+          <li><strong>Cognitive surrender (S12)</strong> — over time the babysitting role degrades human judgment too.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Bakker &amp; Demerouti (2006/2007)</span>
+        <span class="cite">Deci &amp; Ryan (SDT)</span>
+        <span class="cite">Hackman &amp; Oldham</span>
+        <span class="cite">Rousseau (1995)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q8 — Block 3 · Psychological safety + contract ═══════════ -->
+<article class="q" id="q8" data-b="3">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">8</div>
+      <div class="q-meta">
+        <div class="q-block">Block 3 · Psychological safety &amp; the AI workplace</div>
+        <div class="q-text">CareLine, a 6,000-employee insurance claims operation, has deployed an AI triage system that scores claim legitimacy. Adjusters who override the AI face a written justification and a longer audit. After six months, override rates have dropped to 3%, exactly as planned — but the legal team has identified two cases where adjusters spotted clear fraud signals and chose not to flag them. The COO is proud of the consistency; the CHRO is worried. Using one core framework, diagnose the cultural problem and recommend changes.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">The diagnosis is broken <strong>psychological safety</strong> (Edmondson, 1999): when speaking up against the AI is costly, the team will stop — even when they're right.</p>
+
+      <ul>
+        <li><strong>Psychological safety</strong> — shared belief the team is safe for interpersonal risk-taking; required for speaking up about errors, asking questions, suggesting changes, flagging AI mistakes.</li>
+        <li><strong>The mechanism</strong> — the override penalty (justification + audit) makes contesting the AI an act of personal risk; rational adjusters stop flagging, even on clear signals. Override rate ≠ accuracy.</li>
+        <li><strong>Moral courage (Edmondson, 2020; Hannah &amp; Avolio, 2010)</strong> — without safety, only the courageous speak up — and they pay for it. Policies built on solitary courage fail.</li>
+        <li><strong>Psychological contract (Rousseau, 1995)</strong> — the implicit promise to adjusters ("your expert judgment matters") has been quietly broken by the audit asymmetry.</li>
+        <li><strong>Cognitive surrender (S12)</strong> — adjusters slide into rubber-stamping AI decisions; the COO's "consistency" is the symptom of the failure, not its solution.</li>
+        <li><strong>Recommendation</strong> — symmetric audits (audit AI agreement too, not just override); reward dissent that catches errors; make override-with-evidence a positive metric; rebuild the contract with explicit voice channels.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>Open by separating compliance ("low override rate") from quality ("we miss fraud"). Then name psychological safety as the missing structural condition. The 5/5 add is to chain three frameworks: safety + contract + cognitive surrender — each explains a layer of why the design produces silent failure.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>Cognitive surrender / "Confidently Wrong" (S12)</strong> — when AI is wrong and humans defer, the joint system performs worse than either alone.</li>
+          <li><strong>Air Canada chatbot (S17)</strong> — bottom-line: leaving humans out of meaningful oversight creates accountability liability.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Edmondson (1999, 2020)</span>
+        <span class="cite">Rousseau (1995)</span>
+        <span class="cite">Kahneman (2002)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q9 — Block 3 · People Analytics ═══════════ -->
+<article class="q" id="q9" data-b="3">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">9</div>
+      <div class="q-meta">
+        <div class="q-block">Block 3 · People Analytics</div>
+        <div class="q-text">NovaConsult, a 3,000-consultant professional services firm, has rebuilt its HR dashboards: turnover, engagement, time-to-hire, billable hours per consultant. The CHRO is proud — every Friday a 40-page report goes to leadership. But promotion decisions are still made by partners' intuition, attrition keeps rising in the 2-3 year cohort, and no one can explain why. The CEO asks: "We have so much data — why don't we have answers?" Using one core framework, explain the gap and recommend how to evolve the function.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">The gap is the classic <strong>Reporting vs Analytics</strong> distinction (S11), framed by <strong>Ferrar &amp; Green's (2021) People Analytics definition</strong>: NovaConsult is doing reporting, not analytics.</p>
+
+      <ul>
+        <li><strong>People Analytics (Ferrar &amp; Green, 2021)</strong> — the analysis of employee and workforce data to reveal insights and provide recommendations to improve business outcomes; covers recruitment, performance, engagement, retention.</li>
+        <li><strong>Reporting</strong> — tells you turnover in the 2-3 year cohort is 22%. (NovaConsult is here.)</li>
+        <li><strong>Analytics</strong> — tells you it's 22% BECAUSE post-promotion ambiguity + lack of mentor allocation drives departures — AND here's the fix.</li>
+        <li><strong>Activities → outcomes (Ferrar &amp; Green)</strong> — climb the ladder: dashboards &amp; reporting → KPIs &amp; metrics → predictive analytics → advanced analytics &amp; AI; outcomes: workforce experience, analytics culture, business performance, societal benefits.</li>
+        <li><strong>Organisational Network Analysis (ONA)</strong> — for a consulting firm, ONA on collaboration patterns would surface mentor bottlenecks and hidden silos that explain attrition; pair with explicit ethics (consent, transparency, purpose limitation).</li>
+        <li><strong>People analytics as capability (Adam Grant)</strong> — "every opinion you hold at work is a hypothesis waiting to be tested"; move from a siloed function to a firm-wide capability that informs partner judgement.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>The killer line under exam pressure: "Reporting answers <em>what</em>; analytics answers <em>why</em> and <em>what next</em>." NovaConsult has industrialised reporting and called it analytics. The recommendation is to move up the activities ladder (add predictive layer, ONA, hypothesis-testing rituals) AND treat analytics as a capability across partners, not a department.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>RippleHire (S9)</strong> — quality-of-hire as a measurable post-hire outcome, not a recruitment KPI.</li>
+          <li><strong>Adam Grant quote (S11)</strong> — anchor the cultural shift.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Ferrar &amp; Green (2021)</span>
+        <span class="cite">ONA (S11)</span>
+        <span class="cite">Adam Grant (S11)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q10 — Block 4 · Change models comparison ═══════════ -->
+<article class="q" id="q10" data-b="4">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">10</div>
+      <div class="q-meta">
+        <div class="q-block">Block 4 · Change models for AI</div>
+        <div class="q-text">Helix Operations, a 9,000-employee logistics company, plans to replace 40% of its mid-office work with an AI-driven workflow platform over 18 months. The HR director has read about Lewin, Kotter and ADKAR but cannot decide which model to use to structure the change programme. The CEO wants a clear roadmap that addresses both the organisation-wide rollout and the individual experience of the affected workers. Compare the three models in this context and recommend which combination Helix should use, justifying the trade-offs of each.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">No single model is sufficient; use <strong>Kotter's 8-step</strong> as the organisational roadmap, <strong>ADKAR (Hiatt)</strong> as the individual lens, and <strong>Stouten et al. (2018)</strong> as the evidence-based update — Lewin is too coarse but useful for framing.</p>
+
+      <ul>
+        <li><strong>Lewin (1947) — 3 steps</strong> — Unfreeze, Transition, Refreeze. STRENGTH: simple, intuitive, communicates the arc of change. WEAKNESS: too linear; underspecifies the playbook; assumes a stable end-state, which AI doesn't have.</li>
+        <li><strong>Kotter — 8 steps</strong> — urgency → guiding coalition → vision → communicate → empower → short-term wins → consolidate → institutionalise. STRENGTH: action-oriented organisational playbook. WEAKNESS: "sense of urgency" is contested — Stouten shows it triggers fear and resistance.</li>
+        <li><strong>ADKAR (Hiatt)</strong> — Awareness, Desire, Knowledge, Ability, Reinforcement. STRENGTH: the individual-level lens — change happens through individuals. WEAKNESS: silent on power, structure, and coalitions; pair with Kotter, don't replace.</li>
+        <li><strong>Stouten et al. (2018) — Evidence-based 10 steps</strong> — replaces "urgency" with "assess the opportunity/problem"; foregrounds procedural justice, voice, AMO, self-efficacy. The strongest contemporary anchor.</li>
+        <li><strong>Recommendation</strong> — Stouten/Kotter at the organisational level (problem framing, coalition, vision, communication, mobilisation, empowerment, wins, institutionalisation); ADKAR for each worker's journey (especially the 40% whose jobs change most).</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>The exam reward is to refuse the false choice. State explicitly that Kotter/Stouten operates at the org level and ADKAR at the individual level — they are layers, not alternatives. Bonus: cite Shaw et al. (2003) — communicating the vision reduces resistance by 43%.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>ManCo (S13/14)</strong> — Pajuoja's enablers/hindrances of GenAI adoption: organisation + individual + work context + tool — exactly the multi-level lens Stouten requires.</li>
+          <li><strong>Helix Operations (the assigned case)</strong> — replacement-of-work change; the individual psychological contract (Rousseau, 1995) is the spine of ADKAR's "Desire" step.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Lewin</span>
+        <span class="cite">Kotter</span>
+        <span class="cite">Hiatt (ADKAR)</span>
+        <span class="cite">Stouten et al. (2018)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q11 — Block 4 · K&S resistance + foundations ═══════════ -->
+<article class="q" id="q11" data-b="4">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">11</div>
+      <div class="q-meta">
+        <div class="q-block">Block 4 · Managing resistance to change</div>
+        <div class="q-text">Lumen Energy, a regulated utility with 7,500 employees, is deploying an AI optimisation system for grid balancing. Field engineers (the largest group) believe the system threatens their expertise and are openly resisting; union representatives are demanding consultation; the regulator requires a launch within nine months for grid-reliability reasons. The COO is under time pressure but knows that long-term operational success depends on engineer buy-in. Using Kotter &amp; Schlesinger's six approaches to resistance, recommend which approach (or combination) the COO should use and discuss the trade-offs.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">The right answer uses <strong>Kotter &amp; Schlesinger's 6 approaches to resistance</strong> as a tactical menu and the <strong>4 foundations to overcome resistance</strong> (S14) as the structural backdrop — not a single tactic, a sequenced combination.</p>
+
+      <ul>
+        <li><strong>Communication &amp; education</strong> — engineers resist partly from misinformation about AI replacing them; explain mechanism + role evolution. Slow but yields implementation help once persuaded.</li>
+        <li><strong>Participation &amp; involvement</strong> — let engineers help design the operator interface and the override logic; their domain knowledge improves the model. Builds commitment; slow if scope is wrong.</li>
+        <li><strong>Facilitation &amp; support</strong> — training, transition coaching, role-redesign workshops to address fear-of-inability. Best for adjustment problems; expensive but durable.</li>
+        <li><strong>Negotiation &amp; agreement</strong> — engage the union with formal commitments (no involuntary layoffs, retraining funds). Buys cooperation from the powerful resister.</li>
+        <li><strong>Manipulation &amp; cooptation</strong> — co-opt a respected senior engineer onto the project's steering committee. Quick + cheap, but blows up if discovered.</li>
+        <li><strong>Coercion</strong> — formal authority + sanctions. Last resort. Quick, but creates resentment and undermines the long-term operational buy-in the COO needs.</li>
+        <li><strong>Recommendation</strong> — lead with participation + facilitation, formalise with union negotiation, use communication throughout; coercion only as backstop for the regulator deadline.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>The mock Q1.3 trap: short time + dissatisfaction tolerated ≠ "just use coercion". For Lumen, long-term operational dependence on the same engineers means coercion is the wrong primary tactic. Layer the <strong>4 foundations</strong>: positive relationships, psychological safety, procedural justice (fair implementation softens negative outcomes), select people open to change.</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>Mock Q1.3 (AI performance evaluation)</strong> — the analogous prompt: when leadership wants speed and accepts some dissatisfaction, coercion or manipulation may win in the short term, but is wrong when long-term cooperation is needed.</li>
+          <li><strong>ManCo (S13)</strong> — adoption barriers (individual reluctance, fear-of-skill-loss) are exactly the adjustment problems facilitation addresses.</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">Kotter &amp; Schlesinger</span>
+        <span class="cite">Stouten et al. (2018)</span>
+        <span class="cite">Edmondson (1999)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ═══════════ Q12 — Block 4 · RACI + governance archetypes ═══════════ -->
+<article class="q" id="q12" data-b="4">
+  <div class="container">
+    <div class="q-head">
+      <div class="q-num">12</div>
+      <div class="q-meta">
+        <div class="q-block">Block 4 · Governance &amp; RACI at AI scale</div>
+        <div class="q-text">Unity Health, a hospital network with 18,000 staff, has scaled an AI triage system across 12 emergency departments. The system now handles ~2,000 triage decisions per day. Two recent incidents — a delayed sepsis case and a misclassified pediatric chest pain — have exposed unclear accountability: clinicians say "the AI made the call", the data team says "we just built the model", and the C-suite says "operations owns it". The board has asked the new Chief AI Officer to propose a governance design. Using the RACI framework and the three governance archetypes, recommend a structure and justify the trade-offs.</div>
+      </div>
+    </div>
+    <div class="a">
+      <p class="a-lead">The diagnosis is the <strong>decoupling problem</strong> (S17) and broken <strong>RACI</strong>; the fix combines a <strong>federated governance archetype</strong> with explicit RACI per decision tier and embedded guardrails.</p>
+
+      <ul>
+        <li><strong>RACI</strong> — Responsible (does the work, can be many), Accountable (owns the outcome, exactly ONE, cannot be delegated), Consulted (input BEFORE, two-way), Informed (notified AFTER, one-way). Only A is singular.</li>
+        <li><strong>Why RACI breaks at AI scale (Air Canada)</strong> — (1) R when AI acts in real-time; (2) A when AI causes harm — AI cannot legally hold A; (3) volume breaks C and I (you can't consult 2,000 times/day).</li>
+        <li><strong>Decoupling problem</strong> — decision rights delegated to AI, accountability stays with humans; without explicit assignment, accountability evaporates.</li>
+        <li><strong>3 decision tiers (S17)</strong> — Strategic (deploy AI at all? Board/C-suite) · Structural (how is it integrated? BU leads, product) · Operational (what does AI decide? delegated to the algorithm).</li>
+        <li><strong>Three governance archetypes</strong> — Centralised (consistency + bottleneck), Federated (speed + drift risk), Embedded guardrails (scale + who audits?). Each has a clear strength and weakness.</li>
+        <li><strong>Recommendation</strong> — Federated as the backbone (each ED owns operational deployment), with centralised policy + a designated Accountable role (e.g., Chief Medical Information Officer) signing off per site; Embedded guardrails (red-flag triggers escalate to human review) for the volume problem; quarterly audits to test the guardrails.</li>
+      </ul>
+
+      <div class="box">
+        <h5>Why it matters / how to write it</h5>
+        <p>The 5/5 move is to chain: decoupling diagnoses the gap → RACI shows where A is missing → archetype choice gives the structural fix. State explicitly that ONE role must be A per decision tier and per site, and that human oversight is a <em>design problem</em>, not a checkbox — connect to Floridi &amp; Cowls' explicability + Kahneman/cognitive surrender (passive HITL fails).</p>
+      </div>
+
+      <div class="box case">
+        <h5>Class examples or anchor cite</h5>
+        <ul>
+          <li><strong>Air Canada chatbot (S17)</strong> — canonical case; the tribunal pushed Accountability back to the organisation; "the chatbot is a separate legal entity" defence failed.</li>
+          <li><strong>Mock Q1.2 (RACI)</strong> — anchor: Responsible = the DOER; the trap is confusing it with Accountable (the OWNER who signs off).</li>
+        </ul>
+      </div>
+
+      <div class="cite-row">
+        <span class="cite">RACI (S17)</span>
+        <span class="cite">Air Canada (S17)</span>
+        <span class="cite">Floridi &amp; Cowls (2019)</span>
+        <span class="cite">Kahneman (2002)</span>
+      </div>
+    </div>
+  </div>
+</article>
+
+<footer>
+  <div class="container">
+    <p>12 essay-style questions with framework-anchored answers, class cases and author cites for AI for Sustainable Leadership (C8, 2025-2026).</p>
+  </div>
+</footer>
+
+</body>
+</html>

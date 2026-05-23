@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI for Sustainable Leadership — MCQ Trainer</title>
+
+<!--
+================================================================================
+  MCQ TRAINER — reusable across subjects
+================================================================================
+
+  HOW TO MAKE A VERSION FOR ANOTHER SUBJECT:
+    1. Copy this file (e.g. "mcq_trainer_marketing.html")
+    2. Replace the contents of <script id="quiz-data"> below with your own JSON
+       following the same schema (subject, subjectId, blocks → questions)
+    3. That's it — open in a browser, works offline. Progress is stored per
+       subjectId in localStorage so different subjects don't collide.
+
+  QUESTION SCHEMA:
+    {
+      "subject":   "<display name>",
+      "subjectId": "<unique slug, used for localStorage>",
+      "blocks": [
+        {
+          "id":    "<unique short id>",
+          "title": "<displayed on home tile>",
+          "questions": [
+            {
+              "q": "<question text>",
+              "options": ["A text", "B text", "C text", "D text"],
+              "answer": <0-based index of the correct option>,
+              "rationale": "<one-line explanation shown after answering>"
+            },
+            ...
+          ]
+        },
+        ...
+      ]
+    }
+================================================================================
+-->
+
+<style>
+:root{
+  --bg:#f7f8fa;
+  --panel:#ffffff;
+  --ink:#1f2937;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --accent:#2563eb;
+  --accent-soft:#dbeafe;
+  --good:#16a34a;
+  --good-soft:#dcfce7;
+  --bad:#dc2626;
+  --bad-soft:#fee2e2;
+  --gold:#d97706;
+  --silver:#9ca3af;
+  --bronze:#b45309;
+  --radius:12px;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Atkinson Hyperlegible','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  transition:background-color .25s ease;
+}
+body.flash-good{background:var(--good-soft)}
+body.flash-bad{background:var(--bad-soft)}
+
+.app{max-width:880px;margin:0 auto;padding:32px 20px 80px}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.topbar h1{font-size:1.4rem;font-weight:700;letter-spacing:-.01em}
+.topbar .sub{color:var(--muted);font-size:.85rem;margin-top:2px}
+.home-btn{
+  appearance:none;background:none;border:1px solid var(--line);
+  font:inherit;color:var(--muted);cursor:pointer;
+  padding:6px 12px;border-radius:8px;font-size:.85rem;font-weight:600;
+}
+.home-btn:hover{background:#fff;color:var(--ink)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.timer{
+  display:inline-flex;align-items:center;gap:6px;
+  font-variant-numeric:tabular-nums;font-weight:700;font-size:.92rem;
+  color:var(--ink);padding:6px 12px;border-radius:8px;
+  background:#f3f4f6;border:1px solid var(--line);min-width:78px;justify-content:center;
+}
+.timer.paused{color:var(--muted);background:#fafafa}
+.timer .dot{
+  width:6px;height:6px;border-radius:50%;background:var(--good);
+  animation:pulse 1.4s ease-in-out infinite;
+}
+.timer.paused .dot{background:var(--muted);animation:none}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ---------- screens ---------- */
+.screen{display:none;animation:fade .25s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---------- home: medal shelf ---------- */
+.medal-shelf{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 18px;margin-bottom:20px;box-shadow:var(--shadow);
+}
+.medal-shelf h2{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+.medal-row{display:flex;flex-wrap:wrap;gap:10px}
+.medal{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 12px;border-radius:999px;
+  background:#fef9e6;border:1px solid #fde68a;
+  font-size:.82rem;font-weight:600;color:#92400e;
+}
+.medal .ic{font-size:1.05rem;line-height:1}
+.medal.empty{background:#f3f4f6;border-color:var(--line);color:#9ca3af}
+.medal.silver{background:#f3f4f6;border-color:#d1d5db;color:#374151}
+.medal.bronze{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+
+/* ---------- home: block tiles ---------- */
+.tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.tile{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 18px 16px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:10px;text-align:left;
+  font:inherit;color:inherit;appearance:none;
+}
+.tile:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08);border-color:#cbd5e1}
+.tile-title{font-weight:700;font-size:1rem;color:var(--ink)}
+.tile-meta{font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.tile-medals{display:flex;gap:6px;flex-wrap:wrap;min-height:22px}
+.tile-medals .medal{padding:3px 8px;font-size:.72rem}
+.tile.mixed{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border-color:transparent}
+.tile.mixed .tile-title{color:#fff}
+.tile.mixed .tile-meta{color:rgba(255,255,255,.85)}
+
+/* ---------- quiz ---------- */
+.progress-wrap{margin-bottom:18px}
+.progress-bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);transition:width .35s ease;width:0%}
+.progress-meta{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-top:6px}
+
+.question-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:28px 28px 24px;box-shadow:var(--shadow);
+}
+.q-text{font-size:1.08rem;font-weight:600;line-height:1.5;margin-bottom:22px;color:var(--ink)}
+.options{display:grid;gap:10px}
+.opt{
+  display:block;width:100%;text-align:left;
+  padding:14px 16px;border:1.5px solid var(--line);border-radius:10px;
+  background:#fff;font:inherit;font-size:.96rem;color:var(--ink);
+  cursor:pointer;transition:border-color .12s ease,background-color .12s ease,transform .08s ease;
+}
+.opt:hover:not(:disabled){border-color:var(--accent);background:#f8fafc}
+.opt:active:not(:disabled){transform:scale(.998)}
+.opt:disabled{cursor:default;opacity:.95}
+.opt .letter{
+  display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;
+  background:#f3f4f6;border-radius:6px;font-weight:700;font-size:.78rem;margin-right:10px;color:var(--muted);
+}
+.opt.correct{border-color:var(--good);background:var(--good-soft)}
+.opt.correct .letter{background:var(--good);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .letter{background:var(--bad);color:#fff}
+
+.feedback{margin-top:18px;display:none}
+.feedback.show{display:block;animation:fade .2s ease}
+.feedback .verdict{font-weight:700;font-size:1.02rem;margin-bottom:6px}
+.feedback.good .verdict{color:var(--good)}
+.feedback.bad .verdict{color:var(--bad)}
+.feedback .rationale{color:#374151;font-size:.92rem}
+.feedback .next-btn{
+  margin-top:14px;appearance:none;border:none;
+  background:var(--accent);color:#fff;font:inherit;font-weight:600;
+  padding:10px 22px;border-radius:8px;cursor:pointer;font-size:.92rem;
+}
+.feedback .next-btn:hover{background:#1d4ed8}
+
+/* ---------- break modal ---------- */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;
+  align-items:center;justify-content:center;padding:24px;z-index:50;
+  animation:fade .2s ease;
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  background:#fff;border-radius:var(--radius);max-width:420px;width:100%;
+  padding:28px 24px 22px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.18);
+}
+.modal h3{font-size:1.2rem;margin-bottom:8px}
+.modal p{color:var(--muted);font-size:.92rem;margin-bottom:18px}
+.modal .row{display:flex;gap:10px;justify-content:center}
+.modal button{
+  appearance:none;border:none;font:inherit;font-weight:600;
+  padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.92rem;
+}
+.modal .primary{background:var(--accent);color:#fff}
+.modal .primary:hover{background:#1d4ed8}
+.modal .ghost{background:#f3f4f6;color:var(--ink)}
+.modal .ghost:hover{background:#e5e7eb}
+
+/* ---------- end screen ---------- */
+.end-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:32px 28px;text-align:center;box-shadow:var(--shadow);
+}
+.end-card h2{font-size:1.4rem;margin-bottom:6px}
+.end-card .sub{color:var(--muted);margin-bottom:22px}
+.end-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.end-stat{background:#f8fafc;border-radius:10px;padding:14px 6px}
+.end-stat .v{font-size:1.6rem;font-weight:700;color:var(--ink)}
+.end-stat .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.earned-medals{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:8px 0 22px}
+.earned-medals:empty{display:none}
+.earned-medals .medal{font-size:.9rem;padding:8px 14px}
+.end-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.end-actions button{
+  appearance:none;border:none;font:inherit;font-weight:600;
+  padding:10px 22px;border-radius:8px;cursor:pointer;font-size:.92rem;
+}
+.end-actions .primary{background:var(--accent);color:#fff}
+.end-actions .primary:hover{background:#1d4ed8}
+.end-actions .ghost{background:#f3f4f6;color:var(--ink)}
+.end-actions .ghost:hover{background:#e5e7eb}
+
+@media (max-width:500px){
+  .app{padding:18px 14px 60px}
+  .question-card{padding:20px 18px}
+  .q-text{font-size:1rem}
+  .opt{font-size:.92rem;padding:12px 14px}
+  .end-stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     QUESTION DATA — replace this block to make a new subject
+     ============================================================ -->
+<script id="quiz-data" type="application/json">
+{
+  "subject": "AI for Sustainable Leadership",
+  "subjectId": "aisl_2026",
+  "blocks": [
+    {
+      "id": "b1_short",
+      "title": "Block 1 (1 pt) · Sustainability & Ethics",
+      "questions": [
+        {
+          "q": "A consultant argues that the carbon footprint of an LLM is the only sustainability issue that matters for an AI strategy. Which framework best refutes this view?",
+          "options": [
+            "OECD AI Principles",
+            "Hahn et al. integrative sustainability",
+            "Floridi & Cowls five principles",
+            "EU AI Act risk tiers",
+            "Servant leadership theory"
+          ],
+          "answer": 1,
+          "rationale": "Hahn et al. (2014) names three dimensions — economic, social AND environmental — across three levels and through time. Reducing AI sustainability to emissions ignores the social and economic dimensions."
+        },
+        {
+          "q": "Crawford (2021) describes the AI ecosystem as starting with which stage?",
+          "options": [
+            "Deployment and use",
+            "Impact and waste",
+            "Recovery and circularity",
+            "Natural resources",
+            "Model training pipelines"
+          ],
+          "answer": 3,
+          "rationale": "Crawford traces AI back to its planetary supply chain — minerals, water, energy, land, human labour. The ecosystem map starts upstream, not at the model."
+        },
+        {
+          "q": "An EU bank deploys an AI system to decide loan eligibility. Recruiters override 5% of decisions. Under the EU AI Act, the system is:",
+          "options": [
+            "Minimal risk because of human override",
+            "Limited risk because lending is regulated",
+            "High risk regardless of override frequency",
+            "Unacceptable risk and therefore banned",
+            "Outside the scope of the AI Act"
+          ],
+          "answer": 2,
+          "rationale": "Credit scoring is HIGH-RISK under the Act. Like recruitment (mock Q1.1), occasional human override does not downgrade the tier."
+        },
+        {
+          "q": "Floridi & Cowls (2019) call one principle the 'enabler' of the other four. Which one?",
+          "options": [
+            "Beneficence",
+            "Non-maleficence",
+            "Autonomy",
+            "Justice",
+            "Explicability"
+          ],
+          "answer": 4,
+          "rationale": "Explicability (transparency + accountability) is the precondition for the other four; without it, none can be verified."
+        },
+        {
+          "q": "A leader who uses idealised influence, inspirational motivation, intellectual stimulation and individualised consideration is practicing which style?",
+          "options": [
+            "Servant leadership",
+            "Ethical leadership",
+            "Transformational leadership",
+            "Authentic leadership",
+            "Transactional leadership"
+          ],
+          "answer": 2,
+          "rationale": "The four I's are the canonical components of Bass & Riggio's transformational leadership. Servant focuses on follower welfare; ethical on moral conduct."
+        },
+        {
+          "q": "Which leadership theory most directly addresses 'speaking up' about an AI deployment risk under social pressure to stay silent?",
+          "options": [
+            "Servant leadership",
+            "Moral courage",
+            "Transformational leadership",
+            "Ethical leadership",
+            "Theory of planned behaviour"
+          ],
+          "answer": 1,
+          "rationale": "Moral courage (Edmondson 2020; Hannah & Avolio 2010) is acting on ethical convictions despite risk of loss — the construct that maps to whistleblowing/speaking up."
+        },
+        {
+          "q": "A company's AI ethics committee meets quarterly, has no decision authority, and never reviews a deployed model. This is most likely an example of:",
+          "options": [
+            "Embedded governance",
+            "Ethics-by-design",
+            "Innovation theatre",
+            "Federated governance",
+            "Responsible AI lifecycle"
+          ],
+          "answer": 2,
+          "rationale": "Innovation theatre (S5): symbols of responsibility without structural change. The committee exists for legitimacy, not control."
+        },
+        {
+          "q": "Which of the following is an UNACCEPTABLE-risk AI practice under the EU AI Act?",
+          "options": [
+            "AI used in recruitment shortlisting",
+            "AI for medical-image triage",
+            "Real-time remote biometric ID in public spaces by governments",
+            "AI chatbots for customer service",
+            "AI used in credit scoring"
+          ],
+          "answer": 2,
+          "rationale": "Real-time public biometric ID by governments is banned. Recruitment + credit + medical = high-risk (regulated). Chatbots = limited (transparency only)."
+        },
+        {
+          "q": "The OECD AI Principles include all of the following EXCEPT:",
+          "options": [
+            "Inclusive growth and well-being",
+            "Human-centred values and fairness",
+            "Transparency and explainability",
+            "Robustness, security and safety",
+            "Carbon neutrality by 2030"
+          ],
+          "answer": 4,
+          "rationale": "Carbon neutrality is not a stated OECD principle. The five are: inclusive growth, human-centred values, transparency, robustness, accountability."
+        },
+        {
+          "q": "Wade & Tomoko (2024) argue that AI ethics must be built as:",
+          "options": [
+            "A regulatory checklist",
+            "A board-level reporting metric",
+            "A multidisciplinary capability",
+            "An external audit function",
+            "A communications priority"
+          ],
+          "answer": 2,
+          "rationale": "Their argument: ethics has to be an organisational CAPABILITY (translating principles to practice, embedded in lifecycle, multidisciplinary committee) — not a checklist."
+        },
+        {
+          "q": "A 'Human-in-the-loop' (HITL) design is most accurately described as:",
+          "options": [
+            "AI provides recommendations; a human must approve each decision before action",
+            "AI acts autonomously; humans audit after the fact",
+            "Humans label data; AI then runs unsupervised",
+            "AI replaces the human entirely",
+            "Two AI systems check each other"
+          ],
+          "answer": 0,
+          "rationale": "HITL = a human must approve each individual decision. HOTL (on-the-loop) = humans monitor in aggregate but don't approve each one."
+        },
+        {
+          "q": "Which is the BIGGEST sustainability barrier in the AI ecosystem according to Gambacorta & Shreeti (2025)?",
+          "options": [
+            "Lack of consumer awareness",
+            "Extreme market concentration",
+            "Insufficient university research",
+            "Slow open-source community",
+            "Limited number of AI ethicists"
+          ],
+          "answer": 1,
+          "rationale": "Extreme market concentration is the first-listed barrier (S2). It produces unequal bargaining power, high entry barriers, and diffused responsibility downstream."
+        },
+        {
+          "q": "'Ghost work' refers to:",
+          "options": [
+            "Anonymous AI-generated content",
+            "Hidden human labour that powers AI (data labelling, content moderation)",
+            "AI replacing factory workers",
+            "Background data processing on devices",
+            "AI used in haunted-house attractions"
+          ],
+          "answer": 1,
+          "rationale": "Ghost work (Mary L. Gray) = the invisible human labour underpinning 'autonomous' AI. A key labour-inequality sustainability challenge."
+        },
+        {
+          "q": "A sustainable leader, per the S2 framing, primarily seeks to:",
+          "options": [
+            "Maximise environmental performance",
+            "Minimise short-term trade-offs by buying offsets",
+            "Reduce tensions in the long term and align interests across levels",
+            "Comply with all current regulations",
+            "Outperform peers on a single ESG metric"
+          ],
+          "answer": 2,
+          "rationale": "S2: 'reduce tensions in the long term; decrease number and magnitude of trade-offs; align interests across social/environmental/economic at different levels'. Single-axis maximisation is the opposite."
+        },
+        {
+          "q": "Brown et al. (2005) define ethical leadership through which two dimensions?",
+          "options": [
+            "Vision and execution",
+            "Moral person and moral manager",
+            "Authority and accountability",
+            "Power and influence",
+            "Inspiration and intellect"
+          ],
+          "answer": 1,
+          "rationale": "Brown et al.: the leader as moral PERSON (traits, behaviour) AND moral MANAGER (communicates ethics, rewards/disciplines, sets climate). Both halves required."
+        },
+        {
+          "q": "The principle of EXPLICABILITY in Floridi & Cowls operationalises which two underlying values?",
+          "options": [
+            "Beneficence and non-maleficence",
+            "Autonomy and justice",
+            "Transparency and accountability",
+            "Trust and consent",
+            "Privacy and fairness"
+          ],
+          "answer": 2,
+          "rationale": "Explicability = transparency (how it works) + accountability (who answers for it). It is the operational underpinning of the other principles."
+        },
+        {
+          "q": "An organisation calls its AI 'neutral' because it reflects historical data. Which sustainability concept best critiques this?",
+          "options": [
+            "Carbon offsetting",
+            "Temporal dependency (Hahn et al.)",
+            "Stakeholder theory",
+            "Triple bottom line",
+            "Circular economy"
+          ],
+          "answer": 1,
+          "rationale": "Temporal dependency: present systems ENCODE past inequalities and PROJECT them forward. 'Neutral because historical' is the exact misreading the framework targets."
+        },
+        {
+          "q": "Ethics-by-design refers to:",
+          "options": [
+            "Hiring ethicists after deployment",
+            "Adding a fairness audit before release",
+            "Embedding ethical considerations into the design and development process from the start",
+            "Publishing model cards",
+            "Running annual third-party audits"
+          ],
+          "answer": 2,
+          "rationale": "Ethics-by-design = ethical considerations baked in throughout the lifecycle. Audits and model cards are tools, not the design principle itself."
+        },
+        {
+          "q": "Czakert & Wietrak (2025) argue that traditional leadership theories treat ethics as:",
+          "options": [
+            "A core competency",
+            "A supplemental virtue",
+            "A regulatory burden",
+            "A communication priority",
+            "A measurable KPI"
+          ],
+          "answer": 1,
+          "rationale": "Their critique: existing theories treat ethics as a supplemental virtue rather than a governance foundation. Hence the call for a new leadership model."
+        },
+        {
+          "q": "Servant leadership (Dierendonck & Nuijten 2011) places highest value on:",
+          "options": [
+            "Operational efficiency",
+            "Shareholder return",
+            "Follower development and stakeholder welfare",
+            "Visionary disruption",
+            "Process compliance"
+          ],
+          "answer": 2,
+          "rationale": "Servant leadership inverts the priority pyramid: serve followers and stakeholders first; organisational outcomes follow."
+        }
+      ]
+    },
+    {
+      "id": "b2_short",
+      "title": "Block 2 (1 pt) · Designing AI Organizations",
+      "questions": [
+        {
+          "q": "A bank places ML engineers inside each business unit (retail, wealth, lending). This structural choice is:",
+          "options": [
+            "Horizontal (centralised) AI team",
+            "Vertical (embedded) AI team",
+            "Matrix AI team",
+            "Holacracy AI team",
+            "Functional AI team"
+          ],
+          "answer": 1,
+          "rationale": "Vertical/embedded = AI lives inside business units (high context relevance, weak cross-unit consistency). Horizontal would pool them in a central function."
+        },
+        {
+          "q": "Vertical vs Horizontal AI team placement creates which signature tension?",
+          "options": [
+            "Cost vs revenue",
+            "Speed vs consistency",
+            "Privacy vs transparency",
+            "Recruitment vs retention",
+            "Hardware vs software"
+          ],
+          "answer": 1,
+          "rationale": "The three tensions (S4): speed vs consistency, local relevance vs global standards, business ownership vs technical ownership."
+        },
+        {
+          "q": "A self-managed organisation with structured rules but no managers is using:",
+          "options": [
+            "Matrix structure",
+            "Functional structure",
+            "Holacracy",
+            "Divisional structure",
+            "Amorphous structure"
+          ],
+          "answer": 2,
+          "rationale": "Holacracy = structured self-management (rules + roles replace managers). Amorphous is fluid and unstructured; not the same."
+        },
+        {
+          "q": "The three AI Lab archetypes from S5 are:",
+          "options": [
+            "Public, private, hybrid",
+            "Centralised, decentralised/embedded, venture/incubator",
+            "Functional, divisional, matrix",
+            "Build, buy, partner",
+            "Strategic, tactical, operational"
+          ],
+          "answer": 1,
+          "rationale": "S5 archetypes: Centralised (pools talent), Decentralised/Embedded (in units), Venture/Incubator (startup logic)."
+        },
+        {
+          "q": "A 'hybrid AI lab' is best defined as one that:",
+          "options": [
+            "Combines cloud and on-prem infrastructure",
+            "Mixes human and AI workers",
+            "Explicitly pursues business AND social objectives",
+            "Operates across two countries",
+            "Switches between agile and waterfall"
+          ],
+          "answer": 2,
+          "rationale": "Hybrid lab (S5) = explicitly pursues both business and social objectives; alignment must be structural, not cosmetic."
+        },
+        {
+          "q": "Innovation theatre is best diagnosed when:",
+          "options": [
+            "A lab is too small",
+            "Pilots never reach production and decision rights stay concentrated",
+            "Investment is too high",
+            "Staff resist new tools",
+            "Regulation is unclear"
+          ],
+          "answer": 1,
+          "rationale": "Innovation theatre = symbols of innovation without changing power, incentives, or decision rights. Pilots that never scale are the canonical signal."
+        },
+        {
+          "q": "A pharma company needs an AI capability where the underlying domain expertise is its strategic differentiator. The right sourcing choice is most likely:",
+          "options": [
+            "Buy from a generic SaaS vendor",
+            "Partner with a non-pharma AI firm",
+            "Make in-house",
+            "Use open-source only",
+            "Outsource to a consultancy"
+          ],
+          "answer": 2,
+          "rationale": "MAKE protects strategic assets, gives control, supports long-term contextual learning. BUY would erode the differentiator."
+        },
+        {
+          "q": "A small e-commerce company without an AI team needs a chatbot live in 3 months. The right sourcing choice is most likely:",
+          "options": [
+            "Make in-house",
+            "Buy a licensed vendor solution",
+            "Partner with a research lab",
+            "Build a foundation model",
+            "Acquire an AI startup"
+          ],
+          "answer": 1,
+          "rationale": "BUY = quick, low upfront cost, focus on core (logistics/suppliers for them), risk shifted to vendor. MAKE is too slow; PARTNER too complex for routine."
+        },
+        {
+          "q": "The biggest risk of BUY in AI sourcing is:",
+          "options": [
+            "High upfront cost",
+            "Slow time to value",
+            "Capability erosion and vendor dependency",
+            "Inability to customise",
+            "Too much customer feedback"
+          ],
+          "answer": 2,
+          "rationale": "BUY's signature risk profile: lower control + capability erosion + vendor dependency + switching costs + blurred accountability."
+        },
+        {
+          "q": "Kloppenborg & Lanning (2012) define a portfolio as:",
+          "options": [
+            "A single complex project",
+            "A collection of projects grouped to meet strategic objectives, measurable and prioritisable",
+            "A set of financial instruments",
+            "A list of completed deliverables",
+            "A team's task backlog"
+          ],
+          "answer": 1,
+          "rationale": "Their definition: portfolio = collection of projects + other work, grouped for effective management, with components that can be measured, ranked, and prioritised."
+        },
+        {
+          "q": "In portfolio management, which executive task comes BEFORE 'authorize'?",
+          "options": [
+            "Govern",
+            "Identify",
+            "Resource",
+            "Deliver",
+            "Audit"
+          ],
+          "answer": 1,
+          "rationale": "The 5-step sequence: Identify → Select → Prioritise → Resource → Govern. Authorisation is part of governance."
+        },
+        {
+          "q": "Matrix organisational structure creates conflict primarily because:",
+          "options": [
+            "It is too hierarchical",
+            "Employees report to two managers with competing priorities",
+            "It has no formal authority",
+            "It eliminates middle management",
+            "It removes specialisation"
+          ],
+          "answer": 1,
+          "rationale": "Matrix = dual reporting (e.g., functional + project). The conflict is built into the structure; flexibility is its upside."
+        },
+        {
+          "q": "A federated AI governance model differs from a centralised one mainly in:",
+          "options": [
+            "Speed of deployment vs consistency of standards",
+            "Cost of compliance vs technical sophistication",
+            "Size of the team vs maturity of the model",
+            "Number of vendors vs number of models",
+            "Annual budget vs quarterly review"
+          ],
+          "answer": 0,
+          "rationale": "Federated wins on speed + domain expertise; centralised wins on consistency + clear accountability. Speed vs consistency is the trade-off."
+        },
+        {
+          "q": "Job deconstruction is best described as:",
+          "options": [
+            "Outsourcing entire roles",
+            "Replacing fixed jobs with dynamic skill-task matching",
+            "Eliminating job descriptions",
+            "Compressing salary grades",
+            "Reducing headcount across functions"
+          ],
+          "answer": 1,
+          "rationale": "Job deconstruction (S4) = matching skills to tasks/projects rather than freezing them into fixed roles. Delta's 'skills-first' transition is the canonical case."
+        },
+        {
+          "q": "Bouquet et al. (2026) propose how many AI innovation paths?",
+          "options": [
+            "Two",
+            "Three",
+            "Four",
+            "Five",
+            "Six"
+          ],
+          "answer": 2,
+          "rationale": "Four paths. Used to map sourcing decisions to strategic intent."
+        },
+        {
+          "q": "In a hybrid AI lab, 'social alignment' is meaningful only if:",
+          "options": [
+            "A CSR report is published",
+            "Embedded into problem selection, success measurement, and trade-off resolution from day one",
+            "An ethics committee is formed",
+            "External auditors are hired",
+            "Funding includes a sustainability tranche"
+          ],
+          "answer": 1,
+          "rationale": "Alignment ≠ a layer added after the fact. S5 explicitly: 'how problems are selected, how success is measured, how trade-offs are resolved — from day one'."
+        },
+        {
+          "q": "Which scenario most warrants a PARTNER sourcing decision?",
+          "options": [
+            "A simple FAQ chatbot for known answers",
+            "A safety-critical model where the firm has no relevant expertise",
+            "Document classification for an internal team",
+            "A research project with no commercial intent",
+            "Two firms with complementary capabilities pursuing a shared use case"
+          ],
+          "answer": 4,
+          "rationale": "PARTNER excels when complementary capabilities are pooled for shared experimentation and cross-domain learning. Safety-critical-no-expertise = MAKE or BUY with strong oversight."
+        },
+        {
+          "q": "Holacracy is LEAST appropriate for:",
+          "options": [
+            "Software startups",
+            "Highly-regulated industries requiring strict reliability",
+            "Creative agencies",
+            "Research labs",
+            "Online retailers"
+          ],
+          "answer": 1,
+          "rationale": "Holacracy struggles where role clarity for audit/compliance and reliability matter most — pharma, nuclear, aviation, banking."
+        },
+        {
+          "q": "The first executive task in portfolio management (Kloppenborg & Lanning) is:",
+          "options": [
+            "Govern",
+            "Resource",
+            "Prioritise",
+            "Identify",
+            "Approve"
+          ],
+          "answer": 3,
+          "rationale": "Identify → Select → Prioritise → Resource → Govern. You can't select what you haven't identified."
+        },
+        {
+          "q": "A federated AI governance model's primary weakness is:",
+          "options": [
+            "Slow deployment",
+            "Lack of domain expertise",
+            "Policy drift and accountability gaps",
+            "High central cost",
+            "Inability to use external vendors"
+          ],
+          "answer": 2,
+          "rationale": "Federated trades centralised rigor for speed; the cost is policy drift, inconsistency, accountability gaps. Centralised is the opposite trade-off."
+        }
+      ]
+    },
+    {
+      "id": "b3_short",
+      "title": "Block 3 (1 pt) · People & Leadership in AI",
+      "questions": [
+        {
+          "q": "In the S8 distinction, decision rights belong to which concept?",
+          "options": [
+            "Task",
+            "Role",
+            "Job",
+            "Authority",
+            "Profile"
+          ],
+          "answer": 3,
+          "rationale": "Authority = decision rights. Role = responsibility in the system. Job = formal HR position. Task = what is done. Profile = who can perform it well."
+        },
+        {
+          "q": "Recruitment differs from selection mainly in its GOAL of:",
+          "options": [
+            "Evaluating candidates against criteria",
+            "Onboarding new hires effectively",
+            "Creating awareness and attracting diverse candidates",
+            "Negotiating compensation packages",
+            "Conducting structured interviews"
+          ],
+          "answer": 2,
+          "rationale": "Recruitment = attract + create awareness. Selection = evaluate + choose. They are sequential and complementary."
+        },
+        {
+          "q": "Bakker & Demerouti's Job Demands–Resources Model explains burnout as:",
+          "options": [
+            "A personality flaw",
+            "A perceived imbalance between job demands and available resources",
+            "Insufficient salary",
+            "A team-level conflict",
+            "Inadequate training in technical skills"
+          ],
+          "answer": 1,
+          "rationale": "JD-R: stress (and burnout) emerge from chronic demand > resource. Karasek & Johnson's demand-control model is the cognate."
+        },
+        {
+          "q": "Self-Determination Theory (Deci & Ryan) identifies which three psychological needs?",
+          "options": [
+            "Autonomy, competence, relatedness",
+            "Power, achievement, affiliation",
+            "Safety, esteem, self-actualisation",
+            "Vision, mission, values",
+            "Hygiene, motivator, equity"
+          ],
+          "answer": 0,
+          "rationale": "SDT's three needs. McClelland's three needs are power/achievement/affiliation; Maslow's hierarchy is the other set listed."
+        },
+        {
+          "q": "In Flow Theory (Csikszentmihalyi), the 'flow' state occurs at the intersection of:",
+          "options": [
+            "High autonomy and high competence",
+            "High challenge and high skill",
+            "High demands and high resources",
+            "Low pressure and high autonomy",
+            "High feedback and high salary"
+          ],
+          "answer": 1,
+          "rationale": "Flow = high challenge × high skill. Low challenge × high skill = boredom; high challenge × low skill = anxiety."
+        },
+        {
+          "q": "Hackman & Oldham's Job Characteristics Model includes which five core characteristics?",
+          "options": [
+            "Pay, perks, prestige, promotion, power",
+            "Skill variety, task identity, task significance, autonomy, feedback",
+            "Authority, accountability, ability, attitude, action",
+            "Vision, value, voice, vigour, victory",
+            "Reach, relevance, reliability, response, return"
+          ],
+          "answer": 1,
+          "rationale": "JCM's five core characteristics. They produce experienced meaningfulness, responsibility, and knowledge of results."
+        },
+        {
+          "q": "Rousseau (1995) defines the psychological contract as a belief about:",
+          "options": [
+            "Salary and benefits",
+            "A reciprocal exchange agreement based on perceived promises",
+            "The legal employment contract",
+            "Team norms and culture",
+            "Personal performance goals"
+          ],
+          "answer": 1,
+          "rationale": "Rousseau: an individual's belief about the terms of a RECIPROCAL exchange, binding parties to reciprocal obligations. Distinct from the legal contract."
+        },
+        {
+          "q": "Psychological safety (Edmondson 1999) is a SHARED belief that the team is safe for:",
+          "options": [
+            "Personal information",
+            "Career risk",
+            "Interpersonal risk-taking",
+            "Financial loss",
+            "Technical experimentation"
+          ],
+          "answer": 2,
+          "rationale": "Edmondson's specific definition: safe for interpersonal risk-taking (speaking up, asking questions, admitting errors). Note: shared, not individual."
+        },
+        {
+          "q": "Ferrar & Green (2021) define People Analytics as the analysis of workforce data to:",
+          "options": [
+            "Replace HR managers with algorithms",
+            "Reveal insights and provide recommendations to improve business outcomes",
+            "Automate payroll processing",
+            "Reduce headcount in support functions",
+            "Calculate the ROI of training programs"
+          ],
+          "answer": 1,
+          "rationale": "Their definition is the standard reference: data analysis → insights + recommendations → improved business outcomes."
+        },
+        {
+          "q": "The key distinction between reporting and analytics is that analytics:",
+          "options": [
+            "Uses more sophisticated software tools",
+            "Involves larger datasets",
+            "Answers 'why' and 'what next', not just 'what'",
+            "Is performed by data scientists, not HR",
+            "Always uses predictive models"
+          ],
+          "answer": 2,
+          "rationale": "S11: 'Reporting tells you turnover was 15%. Analytics tells you it was 15% BECAUSE … and here's how to fix it.' The shift is from descriptive to diagnostic + prescriptive."
+        },
+        {
+          "q": "Organisational Network Analysis (ONA) is primarily used to:",
+          "options": [
+            "Audit IT security",
+            "Map actual collaboration patterns vs the formal org chart",
+            "Compress salary bands",
+            "Forecast attrition",
+            "Track customer relationships"
+          ],
+          "answer": 1,
+          "rationale": "ONA reveals real collaboration (who talks to whom) — exposing brokers, bottlenecks, silos that the formal chart hides. Carries privacy/surveillance risk."
+        },
+        {
+          "q": "Kahneman's 'System 1' is characterised as:",
+          "options": [
+            "Slow, effortful, logical",
+            "Fast, automatic, intuitive",
+            "Conscious, deliberate, careful",
+            "Statistical, evidence-based, calibrated",
+            "Verbal, explicit, structured"
+          ],
+          "answer": 1,
+          "rationale": "System 1 = fast/automatic/emotional/intuitive (face recognition). System 2 = slow/deliberative/effortful/logical (hard maths)."
+        },
+        {
+          "q": "'Cognitive surrender' to AI is most accurately described as:",
+          "options": [
+            "Refusal to use AI tools",
+            "Excessive scrutiny of AI outputs",
+            "Over-reliance on AI even when it misguides the user",
+            "Delegating only routine tasks to AI",
+            "Asking AI to verify human work"
+          ],
+          "answer": 2,
+          "rationale": "S12 finding: when AI was accurate, humans improved a lot; when AI was wrong, they dropped — they trusted it even when it misled. The bypass of System 2 oversight."
+        },
+        {
+          "q": "A team using AI for performance ratings forgets to check the algorithm's reasoning and rubber-stamps its rankings. This illustrates:",
+          "options": [
+            "Halo effect",
+            "Confirmation bias",
+            "Cognitive surrender",
+            "Anchoring bias",
+            "Recency bias"
+          ],
+          "answer": 2,
+          "rationale": "Cognitive surrender = passive HITL → AI outputs accepted without deliberation. Halo/anchoring/recency are different rating biases."
+        },
+        {
+          "q": "The Stress → Burnout pathway in JD-R is mediated by:",
+          "options": [
+            "Skill specialisation",
+            "Perceived imbalance between demands and resources",
+            "Salary level",
+            "Workplace location",
+            "Job title prestige"
+          ],
+          "answer": 1,
+          "rationale": "JD-R's mechanism: chronic perceived imbalance (demands > resources) → stress → burnout. Resources moderate (buffer) the effect."
+        },
+        {
+          "q": "Which is NOT one of the four roles families in S8's AI team role map?",
+          "options": [
+            "Core Technical",
+            "Product & Integration",
+            "Governance & Risk",
+            "Strategic & Leadership",
+            "Customer Success"
+          ],
+          "answer": 4,
+          "rationale": "The four families: Core Technical, Product & Integration, Governance & Risk, Strategic & Leadership. Customer success roles aren't part of this map."
+        },
+        {
+          "q": "In Ferrar & Green's analytics activities, 'predictive analytics' is positioned ABOVE:",
+          "options": [
+            "Dashboards & reporting; KPIs & metrics",
+            "Advanced analytics & AI",
+            "Workforce experience",
+            "Societal benefits",
+            "Analytics culture"
+          ],
+          "answer": 0,
+          "rationale": "The four ACTIVITIES progress: dashboards → KPIs → predictive → advanced AI. The four OUTCOMES are separate."
+        },
+        {
+          "q": "RippleHire is used in the course primarily as:",
+          "options": [
+            "A negative example of biased AI in recruitment",
+            "A positive case of AI-driven recruitment with ethical safeguards",
+            "An example of high-risk AI under the EU AI Act",
+            "An example of cognitive surrender",
+            "A federated governance case"
+          ],
+          "answer": 1,
+          "rationale": "RippleHire (S9) is presented as a constructive case: quality of hire, explainability, ethical principles in AI recruitment."
+        },
+        {
+          "q": "A leader who tailors communication, monitors workload via AI, and provides frequent feedback is using AI for:",
+          "options": [
+            "Strategic decisions only",
+            "Replacing human judgement",
+            "Augmenting people-leadership tasks",
+            "Surveillance of competitors",
+            "Vendor management"
+          ],
+          "answer": 2,
+          "rationale": "S12: AI augments people-leadership (tailored communication, feedback frequency, workload monitoring). Trade-off: surveillance risk."
+        },
+        {
+          "q": "The 'psychological contract' is most likely to be BROKEN by an AI rollout when:",
+          "options": [
+            "Salaries increase as productivity rises",
+            "Workers' implicit promises (e.g., 'I was hired to think') are violated by changed job content",
+            "Office layout is redesigned",
+            "Performance reviews become annual",
+            "Stock options vest faster"
+          ],
+          "answer": 1,
+          "rationale": "Rousseau's psychological contract: beliefs about reciprocal promises. AI that shifts a 'thinking' role to a 'supervising the model' role violates the implicit terms."
+        }
+      ]
+    },
+    {
+      "id": "b4_short",
+      "title": "Block 4 (1 pt) · Executing, Scaling & Governing",
+      "questions": [
+        {
+          "q": "Lewin's classic three-step change model is:",
+          "options": [
+            "Plan, do, check",
+            "Aware, willing, able",
+            "Unfreeze, transition, refreeze",
+            "Initiate, design, operate",
+            "Form, storm, norm"
+          ],
+          "answer": 2,
+          "rationale": "Lewin: Unfreeze → Transition (change) → Refreeze. ADKAR's steps are different; Tuckman's are storming/norming."
+        },
+        {
+          "q": "ADKAR (Hiatt) stands for:",
+          "options": [
+            "Aware, Decide, Knowledge, Action, Reinforce",
+            "Awareness, Desire, Knowledge, Ability, Reinforcement",
+            "Audit, Diagnose, Know, Act, Review",
+            "Adopt, Develop, Knowledge, Apply, Repeat",
+            "Aware, Demand, Knowledge, Adapt, Refine"
+          ],
+          "answer": 1,
+          "rationale": "ADKAR: Awareness · Desire · Knowledge · Ability · Reinforcement. It's the INDIVIDUAL-level change model."
+        },
+        {
+          "q": "Stouten et al. (2018) replace Kotter's 'sense of urgency' with which evidence-based step?",
+          "options": [
+            "Burning platform",
+            "Diagnose the opportunity or problem motivating change",
+            "Empower change agents",
+            "Set OKRs",
+            "Form a war room"
+          ],
+          "answer": 1,
+          "rationale": "Stouten critique: urgency creates fear → undermines responses (Staw 1981); unreachable goals get rejected (Locke & Latham 1990). The evidence-based alternative is diagnostic."
+        },
+        {
+          "q": "Kotter & Schlesinger recommend COERCION when:",
+          "options": [
+            "Workers lack information",
+            "Initiators lack information to design change",
+            "Speed is essential and initiators have considerable power",
+            "Adjustment problems are the main barrier",
+            "Someone will lose out and has power to resist"
+          ],
+          "answer": 2,
+          "rationale": "Coercion = quick, can overcome any resistance, BUT creates resentment. Reserved for crises where speed + power align (mock Q1.3 type)."
+        },
+        {
+          "q": "Which approach to resistance is best when 'someone will lose out and has considerable power to resist'?",
+          "options": [
+            "Communication & education",
+            "Participation & involvement",
+            "Facilitation & support",
+            "Negotiation & agreement",
+            "Coercion"
+          ],
+          "answer": 3,
+          "rationale": "Kotter & Schlesinger: NEGOTIATION when a powerful party loses out. Buy them off explicitly rather than force or persuade."
+        },
+        {
+          "q": "Procedural justice in change management means:",
+          "options": [
+            "Equal pay across roles",
+            "Fairness in the IMPLEMENTATION process itself (voice, transparency, neutral handling)",
+            "Equal outcomes for all employees",
+            "Legal compliance with labour law",
+            "Anonymous performance reviews"
+          ],
+          "answer": 1,
+          "rationale": "Procedural justice = fairness of the process. Oreg et al. (2011): even if outcomes are negative, procedural fairness softens the negative impact."
+        },
+        {
+          "q": "Which is NOT one of the 4 foundations to overcome resistance per S14?",
+          "options": [
+            "Develop positive relationships",
+            "Cultivate psychological safety",
+            "Implement changes fairly",
+            "Select people who accept change",
+            "Maximise financial incentives"
+          ],
+          "answer": 4,
+          "rationale": "The 4 foundations: relationships, psychological safety, procedural justice (fair implementation), selection (openness to experience, etc). Money isn't one of them."
+        },
+        {
+          "q": "Which PM methodology is best for a project with stable, fully-known requirements?",
+          "options": [
+            "Scrum",
+            "Kanban",
+            "Lean",
+            "Waterfall",
+            "Design thinking"
+          ],
+          "answer": 3,
+          "rationale": "Waterfall: linear, sequential; works when requirements are fixed upfront (construction). Fails when requirements emerge."
+        },
+        {
+          "q": "Why do ~85% of AI projects never reach production (Gartner)?",
+          "options": [
+            "The technology is immature",
+            "It is primarily a MANAGEMENT failure, not a tech failure",
+            "Regulation prevents deployment",
+            "GPU shortages",
+            "Lack of model interpretability"
+          ],
+          "answer": 1,
+          "rationale": "S15/S16 explicit message: 'This is primarily a management failure, not a tech failure.' Top causes: data, unclear objectives, complexity, drift, skill gaps."
+        },
+        {
+          "q": "Which is FALSE about an AI project compared with a classic project?",
+          "options": [
+            "Scope is emergent, shaped by data",
+            "Output is a probabilistic model",
+            "Done when accuracy is 'good enough'",
+            "Failure modes include silent degradation",
+            "Timeline can be predicted upfront"
+          ],
+          "answer": 4,
+          "rationale": "AI projects are EXPERIMENT-DRIVEN; timelines are not predictable phases. The other four are the AI-side of the comparison table."
+        },
+        {
+          "q": "'Treat data as a deliverable' (S16) means:",
+          "options": [
+            "Outsource data cleaning",
+            "Data preparation is CORE project work, not pre-project housekeeping",
+            "Sell data products externally",
+            "Store data in a data lake",
+            "Buy data from third parties"
+          ],
+          "answer": 1,
+          "rationale": "Good AI project leadership: data prep is not background work — plan, resource, and protect it as a deliverable in its own right."
+        },
+        {
+          "q": "The three layers of AI decision rights in S17 are:",
+          "options": [
+            "Operational, tactical, strategic",
+            "Strategic, structural, operational",
+            "Centralised, federated, embedded",
+            "Vertical, horizontal, matrix",
+            "Manual, semi-automated, fully automated"
+          ],
+          "answer": 1,
+          "rationale": "S17: Strategic (deploy at all?) → Structural (how integrated?) → Operational (what does AI decide in real time?). Each has a different owner."
+        },
+        {
+          "q": "The 'decoupling problem' in AI governance is that:",
+          "options": [
+            "Two AI systems disagree",
+            "Decision rights and accountability no longer travel together",
+            "Engineers don't talk to business",
+            "Vendors disconnect their APIs",
+            "Data and metadata are stored separately"
+          ],
+          "answer": 1,
+          "rationale": "S17: classically decision rights + accountability travel together. AI delegates rights but accountability stays with humans — so which human, for which decision?"
+        },
+        {
+          "q": "Which AI governance archetype's signature weakness is 'who audits the guardrails'?",
+          "options": [
+            "Centralised",
+            "Federated",
+            "Embedded",
+            "Matrix",
+            "Distributed"
+          ],
+          "answer": 2,
+          "rationale": "EMBEDDED governance bakes rules into the system itself — scales and is consistent, but creates a meta-question of who oversees the oversight code."
+        },
+        {
+          "q": "In RACI, the role that MUST be exactly one person is:",
+          "options": [
+            "Responsible",
+            "Accountable",
+            "Consulted",
+            "Informed",
+            "Delegated"
+          ],
+          "answer": 1,
+          "rationale": "ACCOUNTABLE is singular and cannot be delegated. Responsible can be multiple and can delegate. Consulted/Informed can be many."
+        },
+        {
+          "q": "In RACI, the 'Responsible' role is:",
+          "options": [
+            "The person who signs off and answers for outcomes",
+            "The person who does the work / carries out the task",
+            "Someone consulted before decisions",
+            "Someone informed after decisions",
+            "The person who defines the project scope"
+          ],
+          "answer": 1,
+          "rationale": "Mock Q1.2: Responsible = the DOER. Accountable = the owner who signs off. The classic confusion."
+        },
+        {
+          "q": "The Air Canada chatbot case (S17) shows that:",
+          "options": [
+            "AI is a legal entity separate from its operator",
+            "An organisation remains accountable for AI-generated commitments",
+            "Chatbots must be banned in customer service",
+            "Lawyers should design AI systems",
+            "Customers cannot sue over chatbot answers"
+          ],
+          "answer": 1,
+          "rationale": "The tribunal rejected the 'separate legal entity' argument and held Air Canada accountable. Accountability ('A' in RACI) cannot be delegated to the AI."
+        },
+        {
+          "q": "RACI most clearly breaks down at AI scale because:",
+          "options": [
+            "The framework is too old",
+            "AI decisions happen in real time at volumes that exceed Consult/Inform feasibility",
+            "AI cannot read RACI matrices",
+            "Software doesn't support RACI templates",
+            "Lawyers refuse to use RACI"
+          ],
+          "answer": 1,
+          "rationale": "S17 explicit: at 500 decisions/day, C and I parties can't receive info on each — feedback loops collapse, problems accumulate undetected."
+        },
+        {
+          "q": "A 'kill criterion' in AI project leadership is:",
+          "options": [
+            "A bug that crashes the model",
+            "An explicit go/no-go threshold defined before the project starts",
+            "A security policy",
+            "A model accuracy ceiling",
+            "A cost overrun limit"
+          ],
+          "answer": 1,
+          "rationale": "'Plan to fail fast': build explicit go/no-go gates and kill criteria into the plan. Stopping is not failure; not having a stop rule is."
+        },
+        {
+          "q": "Pajuoja's 'ManCo' case (S13) groups GenAI adoption factors into how many families?",
+          "options": [
+            "Two",
+            "Three",
+            "Four",
+            "Five",
+            "Six"
+          ],
+          "answer": 2,
+          "rationale": "Four families: factors related to the ORGANISATION, INDIVIDUAL, WORK CONTEXT, GenAI TOOL. Each has both enablers and hindrances."
+        }
+      ]
+    },
+    {
+      "id": "scenario",
+      "title": "Scenario MCQs (3 pts) · Exam-style integration",
+      "questions": [
+        {
+          "q": "A logistics company implements an AI-driven workforce-scheduling system that allocates shifts based on predicted demand and individual productivity scores. The system increases warehouse output by 18%. However, an internal audit reveals that the productivity scores depend heavily on physical-task speed, which systematically disadvantages older workers and those with disabilities. Senior management argues the algorithm is 'just optimising what the data shows' and that any social impact is a labour-market issue, not a company responsibility. Which of the following analyses BEST applies the integrative sustainability framework (Hahn et al., 2014)?",
+          "options": [
+            "There is an economic vs social tension at the organisational level only; because the bias mirrors labour-market patterns, the temporal dependency releases the company from responsibility. Disclosing the bias to regulators is the appropriate response.",
+            "There is an economic-social tension operating simultaneously at the individual, organisational, and systemic levels. The temporal dependency is decisive: historical biases about physical productivity are encoded into the model and projected forward. The spatial dependency means the company is embedded in and co-produces the labour-market system; the 'we just optimise data' claim misrepresents this co-production.",
+            "The primary tension is environmental (warehouse energy use); social impacts are secondary and best addressed through HR training rather than model redesign. Spatial dependency points to the local community; temporal dependency is satisfied by audit documentation.",
+            "There is an economic-social tension that the firm can offset by funding accessibility programs in the wider community. This satisfies the spatial dependency through reinvestment, and the temporal dependency through audit logs, while preserving economic gains at the organisational level.",
+            "Sustainability tensions at the organisational level are the appropriate scope of analysis; the systemic level is the responsibility of policymakers, not firms. The company should continue operating the system while sharing findings with the industry association to influence future regulation."
+          ],
+          "answer": 1,
+          "rationale": "Hahn et al. demands all three levels simultaneously + temporal + spatial dependencies. Option B is the only one that names all three correctly and refuses the 'we're neutral' framing the case foregrounds — directly mirroring mock Q2.1."
+        },
+        {
+          "q": "A regional hospital deploys an AI triage system in its emergency department. The system flags incoming patients into three urgency tiers; nurses then perform an in-person assessment within 60 seconds and can override the AI. Six months in, an investigation reveals that nurses override the AI in only 2% of cases and that two children were misclassified as low-priority, leading to delayed treatment. Which response BEST integrates the EU AI Act and the concept of cognitive surrender?",
+          "options": [
+            "The AI is low-risk because nurses retain override authority; the override rate simply needs to be incentivised upward through monthly KPIs.",
+            "The system falls under the EU AI Act's high-risk category because it is used in healthcare with significant individual impact; however, the failure mode is not the AI's risk classification but the design of human oversight: the 60-second window plus social cost of overriding is producing cognitive surrender. The fix combines stricter compliance (logging, oversight audit) with redesigning the human review to invite active System 2 deliberation rather than passive approval.",
+            "The system is limited risk because nurses are clinicians; the issue is purely a training problem. Additional training on AI errors should reduce misclassification.",
+            "The system is unacceptable risk because it caused harm to children; it should be banned and the hospital should return to manual triage immediately.",
+            "The AI Act does not apply because triage is an internal clinical workflow; the hospital should publish a public apology and require nurse signatures on each AI decision."
+          ],
+          "answer": 1,
+          "rationale": "Two-part answer: (1) healthcare triage = high-risk under the AI Act; (2) the symptom is cognitive surrender (S12) — high override rate is the SIGN of meaningful oversight, low override of rubber-stamping. The fix is design of oversight, not just compliance ticking or more training."
+        },
+        {
+          "q": "A fintech firm wants to build a credit-scoring model. It has: no existing ML team, a small data science group focused on dashboards, six months to launch, sensitive customer-financial data that cannot leave the EU, a board mandate to avoid open-ended technology bets, and a strategy that says credit decisioning is a 'core differentiator' for the next five years. Which sourcing recommendation best balances these constraints?",
+          "options": [
+            "MAKE — build entirely in-house using the data-science group; credit is a strategic differentiator so control must be maximised even if delivery slips.",
+            "BUY — license a generic credit-scoring SaaS from a non-EU vendor; speed is decisive and the firm can backfill differentiation later.",
+            "PARTNER — co-develop with a specialised EU-based AI firm: pool complementary capability + on-shore data residency + faster than pure build, with a contractual path to in-house ownership of the model and pipeline within 18 months to protect the long-term strategic position.",
+            "MAKE — but only after a 12-month hiring sprint; the differentiator argument overrides every other constraint.",
+            "BUY then MAKE — license now, build in parallel, switch when ready; this guarantees both speed and control with no governance complexity."
+          ],
+          "answer": 2,
+          "rationale": "Pure MAKE = too slow + no team. Pure BUY = erodes a strategic differentiator + data residency risk. PARTNER addresses all five constraints AND can be structured with an exit/IP path to convert toward MAKE over time. This mirrors mock Q3.1's diagnostic style."
+        },
+        {
+          "q": "A retail bank introduces a new AI-driven loan-approval workflow. Branch managers learn about the change through a mass email two weeks before launch. Most managers resist openly; some quietly continue using the old workflow. Senior leadership has time, wants long-term buy-in, and believes the managers have valid local knowledge about which customers the new model misjudges. Which combination of resistance-management approaches BEST fits this situation per Kotter & Schlesinger?",
+          "options": [
+            "Manipulation and coercion: speed is essential, and managers' resistance threatens the business case; force adoption now and rebuild trust later.",
+            "Negotiation and coercion: offer financial bonuses for compliance and warn of consequences for non-compliance; this is the fastest path to alignment.",
+            "Communication & education combined with participation & involvement: explain the change, then involve the managers in refining the model using their local knowledge; this builds commitment AND improves the design itself.",
+            "Facilitation & support only: provide training; resistance is essentially an adjustment problem and time will resolve it.",
+            "Manipulation & cooptation: appoint a respected manager as 'change champion' to win the others over and quietly sideline the loudest critics."
+          ],
+          "answer": 2,
+          "rationale": "Two-part rationale: managers lack information about WHY (→ communication), and they hold information the designers lack about WHEN the model misjudges (→ participation). The case explicitly notes leadership has time and wants long-term commitment — that rules out coercion/manipulation."
+        },
+        {
+          "q": "A consultancy is asked to design the governance for a city government's new AI system that allocates social-housing applications. The city wants fast decisions for ~3,000 applicants per month, consistent treatment across districts, and resilience against political-bias accusations. Which governance archetype + RACI structure best fits, and why?",
+          "options": [
+            "FEDERATED governance with the AI engineer as A: each district owns its allocation decisions for speed and local sensitivity; the engineer signs off because they know the model.",
+            "EMBEDDED governance with the system itself as A: rules are coded as guardrails inside the AI; no human bottleneck; the system 'owns' its own outputs.",
+            "CENTRALISED governance with a senior city official as A: a central housing-allocation board approves the model and policy framework; the official is named as the single Accountable role; an automated logging + monthly aggregate audit ensures consistency. EMBEDDED guardrails enforce real-time rules. This combines centralised standards (consistency, accountability) with embedded execution (volume + speed).",
+            "MATRIX governance with two A roles: the engineer for technical correctness and the official for political defensibility; dual accountability matches the dual concerns.",
+            "DECENTRALISED governance with no single A: each application is handled by the nearest available official; absence of a fixed A keeps the system flexible and politically agile."
+          ],
+          "answer": 2,
+          "rationale": "Mock-exam-style synthesis: A must be ONE human (so B and E and D are wrong); the case's needs (consistency + political resilience) point to CENTRALISED policy with EMBEDDED execution. Federated trades consistency for speed in the wrong direction here."
+        },
+        {
+          "q": "A 250-person SaaS company has run 12 GenAI pilots in 18 months. All produced glossy demos at quarterly all-hands. Two reached production at small scale. None have changed how the company operates. The CEO publicly calls the firm 'AI-first.' Which diagnosis BEST captures what is happening, and what is the FIRST corrective move?",
+          "options": [
+            "The pilots failed because the engineers are not skilled enough; the first move is to hire a Chief AI Officer.",
+            "This is innovation theatre: the company adopts the symbols of AI innovation (demos, mission statements, lab spaces) without changing decision rights, incentives, or power structures. The first corrective move is structural — examine which decisions the pilots would actually CHANGE, whether the affected functions have a stake in scaling them, and whether anyone owns the scaling P&L; without this, the next 12 pilots will replay the same pattern.",
+            "The pilots failed because of regulatory uncertainty; the first move is to wait until the EU AI Act is fully clarified.",
+            "The pilots failed because the firm picked the wrong vendors; the first move is to switch to enterprise-grade AI platforms.",
+            "The pilots failed because employees lack AI literacy; the first move is to mandate company-wide AI training before any new pilot."
+          ],
+          "answer": 1,
+          "rationale": "S5 textbook diagnosis: 12 demos + 2 in production + no operational change = innovation theatre. The fix is structural, not personnel/vendor/training/regulatory. The case explicitly notes 'unresolved tensions' (exploration/exploitation, signaling/operational)."
+        },
+        {
+          "q": "A senior leader at a manufacturing firm decides to use ChatGPT to draft an internal communication explaining a layoff decision driven by an AI-driven productivity analysis. The draft is sent without further review. Several recipients identify factual errors, including names and dates. Internally, employees describe the email as 'cold' and 'machine-written.' Which combination of frameworks BEST explains what went wrong?",
+          "options": [
+            "JD-R model + Flow Theory: the leader was in a low-resource state and outside flow, leading to a poor decision.",
+            "Kahneman's System 1/2 + cognitive surrender: the leader used the AI as a System-1 substitute (fast, automatic, low effort) without applying System-2 verification; the surrender to AI is the proximate cause of the factual errors and tone. Rousseau's psychological contract is the secondary frame: the layoff email is a moment of acute promise-violation where personal authorship is implicitly part of the reciprocal obligation — outsourcing this damages the employer-employee bond beyond the factual errors themselves.",
+            "Job Characteristics Model + Self-Determination Theory: the leader's job lacked autonomy and skill variety, leading to over-reliance on AI.",
+            "Transformational leadership + servant leadership: the leader was insufficiently visionary, so the AI filled the vacuum.",
+            "Hahn et al. + Floridi & Cowls: the leader violated explicability and the economic-social tension at the systemic level."
+          ],
+          "answer": 1,
+          "rationale": "Two-part frame: cognitive surrender = the proximate mechanism; psychological contract violation = the deeper harm. This is exactly the kind of multi-framework integration scenario questions reward."
+        },
+        {
+          "q": "A health insurer's AI claims-screening system saves €40M/year but, on closer review, systematically denies more claims from a particular postal-code region linked to lower-income groups. The company's lawyers say the model isn't legally discriminatory under current regulation. The CFO wants to keep the system running. The Chief Medical Officer wants to halt deployment immediately. Which leadership approach BEST fits this situation, and what is the strongest underlying frame?",
+          "options": [
+            "Transactional leadership + cost-benefit analysis: continue the system because savings outweigh PR risk; introduce a small remediation fund.",
+            "Ethical leadership (Brown et al.) + moral courage (Edmondson 2020; Hannah & Avolio 2010) anchored in the integrative sustainability framework (Hahn et al.): the CMO's role is to model the moral-person + moral-manager dimensions, exercise moral courage against the dominant economic logic, and name the economic-social tension across individual, organisational and systemic levels — the legality of the discrimination is not the relevant question.",
+            "Servant leadership: the CFO should serve the broader organisation by maintaining financial stability; halt only if PR risk materialises.",
+            "Transformational leadership: the CEO should communicate an inspiring vision and let the system run while a vision-aligned committee debates.",
+            "Authentic leadership: each leader should follow their own values; if they disagree, escalate to the board with no integrating framework."
+          ],
+          "answer": 1,
+          "rationale": "The case sets up a moral-courage moment with a clear economic-social tension. Brown et al. + Edmondson + Hahn et al. is the integrated answer; the 'legal ≠ ethical' reframing is the analytical move the question rewards."
+        },
+        {
+          "q": "A multinational deploys a generative-AI assistant to all 8,000 knowledge workers worldwide. Within three months, internal usage metrics show heavy adoption in tech-hub offices, low adoption in operations-heavy offices, and pockets of strong resistance among middle managers who say it makes their roles redundant. Senior leadership wants the rollout to land within 12 months. Which approach BEST integrates Stouten et al. (2018) and the Pajuoja (ManCo) factor framework?",
+          "options": [
+            "Mandate adoption with monthly compliance reporting; lagging offices receive performance penalties until usage rates equalise.",
+            "Diagnose the opportunity/problem per office (replacing 'sense of urgency'); form local guiding coalitions in each hub; communicate a vision explaining how the assistant changes — not replaces — middle-manager roles (procedural justice + voice); resource each of the four ManCo factor families (organisation, individual, work-context, tool) with tailored interventions per office archetype; identify short-term wins; institutionalise via embedded routines.",
+            "Wait six months; adoption will normalise once peer pressure and tool maturity catch up; meanwhile train HR on AI tools.",
+            "Replace the resistant middle managers with AI-fluent hires from the tech hubs; structural change in personnel is faster than cultural change.",
+            "Centralise all AI usage in a small lab and roll out outputs to other offices; this avoids the adoption-variance problem entirely."
+          ],
+          "answer": 1,
+          "rationale": "Stouten gives the change spine (diagnostic-not-urgency, coalition, vision-with-justice, factor-by-factor resourcing, short wins, institutionalise). Pajuoja's four factor families operationalise WHERE the resourcing goes per office archetype. The other options fail on procedural justice or skip the multi-level diagnosis."
+        },
+        {
+          "q": "An e-commerce firm's CTO proposes scaling a working AI recommendation pilot from 1 country to 28 in 6 months. The model currently performs well, but uses customer-behaviour data subject to varying EU member-state interpretations of the AI Act and GDPR. Which framework combination should anchor the scaling decision?",
+          "options": [
+            "EU AI Act tier classification + the 6Ps of operational capabilities (People, Process, Products & Parts, Policy, Plant & Infrastructure, Partners) + AI-project leadership principles (define success per market, treat data as a deliverable per jurisdiction, plan to fail fast in markets with the highest legal uncertainty, separate exploration from execution, make uncertainty visible to the board).",
+            "EU AI Act only — scale wherever the system is not classified as high-risk; ignore the operational capabilities since the model already works.",
+            "OECD AI Principles — apply them uniformly across markets and trust local compliance teams to handle jurisdictional differences post-launch.",
+            "Job Demands–Resources Model — assess team capacity to handle 28 simultaneous market launches; capacity is the binding constraint.",
+            "RACI — assign each country a single Accountable executive and let them manage their own market; governance solves the legal uncertainty."
+          ],
+          "answer": 0,
+          "rationale": "Scaling is a multi-framework problem: regulatory classification (AI Act) + capability readiness (6Ps) + execution practice (AI-project leadership). The other options pick one lens and miss the others — exactly the failure mode the scenario questions target."
+        },
+        {
+          "q": "During a project debrief, a team leader of an AI translation tool reports: 'We hit our accuracy benchmark, shipped on time, and stayed under budget — but adoption is 12% and falling.' Senior leadership asks what the lessons learned should be. Which response BEST captures the diagnostic per S15-S16?",
+          "options": [
+            "Marketing failure: the tool needs better internal communications and user training.",
+            "Classic-PM success but AI-project failure: the team optimised for visible bugs and feature completion, but missed that 'done' for an AI project means good-enough accuracy IN USE, with adoption as a deliverable in its own right; the team should have defined success including adoption thresholds upfront, treated user-context data as a deliverable, and built kill criteria tied to adoption-rate gates.",
+            "Sourcing failure: the team should have bought a third-party translation tool instead of building in-house.",
+            "Governance failure: a federated governance model would have ensured each business unit adopted the tool.",
+            "Talent failure: the team lacked an AI translator (business integrator role) to bridge users and engineers; hire one for the next project."
+          ],
+          "answer": 1,
+          "rationale": "S15/S16 contrast: classic project = features complete, AI project = good-enough accuracy in use. Adoption IS the success metric for an AI tool; defining success without it is a classic-PM hangover. Option E is partially true but secondary; the framework critique is the answer."
+        },
+        {
+          "q": "A national government tenders a contract for an AI system to assess unemployment-benefit eligibility for 1.2M claimants. Three vendors compete. The lowest bid is from a non-EU vendor with the strongest accuracy. The mid bid is from an EU vendor with weaker accuracy but better explainability. The highest bid is a partnership of two EU vendors offering co-development with the government's data team. Apply the make/buy/partner framework + EU AI Act + integrative sustainability framework to recommend.",
+          "options": [
+            "BUY from the lowest bidder: accuracy maximises citizen welfare; the AI Act compliance can be retrofitted after deployment.",
+            "BUY from the mid bid: explainability is required for a high-risk system under the AI Act; accept the lower accuracy as the cost of compliance.",
+            "PARTNER with the highest bid: unemployment benefits are a HIGH-RISK use under the AI Act (government, welfare access, significant individual impact), so the system needs auditability, accountability, and the ability to remediate bias over time. PARTNER preserves the state's capacity (avoiding capability erosion), keeps data on-shore (jurisdictional integrity), and creates a temporal dependency favourable to the state (the system can be improved as evidence accumulates) — addressing Hahn et al.'s spatial and temporal dimensions in addition to the immediate compliance question.",
+            "MAKE in-house: government should never outsource any AI decision affecting citizens; build a state AI capability over the next 5 years.",
+            "PARTNER with the lowest bidder: combine their accuracy with the government's data; accept the data-residency risk in exchange for cost savings."
+          ],
+          "answer": 2,
+          "rationale": "Multi-framework synthesis: AI Act classifies this as high-risk (so explainability + oversight required, ruling out 'A'); MAKE alone is too slow for citizens already needing benefits; pure BUY erodes long-term capability; PARTNER addresses temporal (improvement over time) + spatial (data residency + state capability) dimensions of Hahn et al."
+        },
+        {
+          "q": "An AI-leadership coach is being deployed to all 2,400 managers at a global firm. Pilot data shows managers who actively challenge the AI's coaching suggestions outperform those who simply implement them. Senior leadership is debating whether to keep the 'challenge AI' design (slower) or move to a 'follow AI by default' design (faster). Which framework combination supports the 'challenge AI' design BEST?",
+          "options": [
+            "Self-Determination Theory + Flow Theory: challenging the AI supports autonomy and keeps managers in flow.",
+            "Kahneman System 1/2 + cognitive surrender + psychological safety: 'follow by default' invites cognitive surrender (System 1 substitution without System 2 verification) and produces 'confidently wrong' decisions; 'challenge AI' design preserves active deliberation. Psychological safety (Edmondson) is the precondition — managers will only push back on the AI if they believe doing so is interpersonally safe. The pilot data is the validation: active challenge is associated with better outcomes, exactly as cognitive-surrender literature predicts.",
+            "RACI: 'challenge AI' assigns Accountable to the manager; 'follow by default' assigns it to the AI; A must be human.",
+            "Servant leadership + ethical leadership: managers should challenge AI because it serves their teams; this is a values question, not a design question.",
+            "Job Characteristics Model: challenging AI raises skill variety and autonomy, increasing motivation; this is a job-design question, not a decision-design question."
+          ],
+          "answer": 1,
+          "rationale": "The case empirically points to active deliberation > passive acceptance — Kahneman + cognitive surrender provides the mechanism, psychological safety provides the precondition. C is also defensible (RACI demands a human A) but it doesn't explain WHY challenge-design outperforms; B integrates mechanism + precondition + evidence."
+        },
+        {
+          "q": "A logistics firm's AI demand-forecasting model has been in production for 14 months. Performance has silently degraded by 6% accuracy as customer behaviour shifted post-pandemic. No one noticed until an external customer escalation. Which combination of failures BEST captures this case?",
+          "options": [
+            "Sourcing failure (should have made in-house) + cultural failure (employees ignored warnings).",
+            "AI-project failure (no plan for model drift — silent degradation) + governance failure (no clear Accountable for monitoring the deployed model — the team that built it is no longer attached, the operations team doesn't know it's their job) + a likely RACI breakdown at scale (Consult/Inform parties cut out of feedback loops at production volume).",
+            "Regulatory failure (the EU AI Act would have flagged this).",
+            "Talent failure (the firm needed more data scientists) + tooling failure (their MLOps stack is outdated).",
+            "Strategic failure (the firm should not have used AI for forecasting) + ethical failure (the customer was harmed)."
+          ],
+          "answer": 1,
+          "rationale": "S15/S16/S17 multi-layer diagnosis: drift is the AI-project failure; ownership ambiguity is the governance failure; the RACI breakdown is exactly the scale problem from S17 (C/I cut out). The other options pick a single lens and miss the system pattern."
+        },
+        {
+          "q": "A non-profit hospital network wants to introduce an AI 'staffing optimiser' that reschedules nursing shifts. Nurses' union representatives demand to be involved in design. HR pushes back: 'we don't have time, the regulator has approved the system.' Which approach BEST integrates Kotter & Schlesinger's resistance approaches with procedural justice and the four foundations to overcome resistance?",
+          "options": [
+            "COERCION + manipulation: regulatory approval makes the system legitimate; assert authority and override the union.",
+            "PARTICIPATION & involvement: invite union reps into co-design, recognising the local knowledge the union holds about how shifts actually work, paired with FACILITATION & support (training); ground both in procedural justice (transparent process, voice, fair handling of concerns) and the four foundations — develop positive relationships with union leadership, cultivate psychological safety so nurses can flag model failures, implement fairly so even imperfect outcomes are seen as legitimate, and (where possible) select trial sites with openness-to-change scores high enough to learn fast.",
+            "NEGOTIATION & agreement: offer the union a pay increase in exchange for compliance; this is fastest.",
+            "COMMUNICATION & education alone: send union reps a deck explaining the AI system; this addresses information gaps.",
+            "Wait for the union to consent on their own timeline; resistance will dissolve once nurses see the benefits."
+          ],
+          "answer": 1,
+          "rationale": "The classic Kotter & Schlesinger 'someone has information you lack' situation (operational shift knowledge) → PARTICIPATION; nurses also need new skill (FACILITATION); procedural justice anchors legitimacy; the 4 foundations make the whole system durable. Coercion + 'regulator approved' is a category error: legal ≠ legitimate to the workforce."
+        },
+        {
+          "q": "A €120M European insurance group is being pushed by activist investors to disclose how its AI-driven underwriting affects customers across socioeconomic groups. The legal team says no current EU rule mandates such disclosure. The CRO wants to publish a one-page summary; the CEO worries it will set an industry precedent that disadvantages the firm. The Chief Data Officer points out that the model is a federated deployment, with different business units tuning thresholds locally, so a single 'fairness score' is technically misleading. Which combination of frameworks BEST anchors the decision?",
+          "options": [
+            "RACI alone: assign a single Accountable executive to publish whatever number the data team produces; the framework's clarity is the answer.",
+            "EU AI Act compliance: since underwriting is high-risk, the firm must publish the documentation the Act requires and nothing more; voluntary disclosure creates legal exposure.",
+            "Federated governance (S17) + Floridi & Cowls explicability + Hahn et al. integrative sustainability: the federated tuning means a single fairness number IS misleading — so disclose the GOVERNANCE design (who tunes what, with which guardrails, audited how often) rather than a flattened metric. Explicability operationalises trust without claiming false precision. The integrative sustainability framing names the economic-social tension across organisational and systemic levels and acknowledges the firm's role in producing — not merely reflecting — the inequality patterns.",
+            "Servant leadership: the CEO should serve customers first and publish the most detailed possible breakdown, ignoring competitive consequences; trust dividends compensate.",
+            "Innovation theatre risk: the disclosure is symbolic; refuse to publish anything until the underlying federated tuning is centralised into a single auditable model."
+          ],
+          "answer": 2,
+          "rationale": "Three-framework synthesis: federated governance explains why a single fairness number is misleading (so what to disclose has to match the governance shape), explicability turns transparency into the right operational handle, and Hahn et al. forces honesty about the firm's role in the system. The other options each pick one lens and miss the synthesis the question is testing."
+        },
+        {
+          "q": "A pharmaceutical company is hiring its first Chief AI Officer. The candidate shortlist has three profiles: (1) a top ML researcher from academia with no industry experience; (2) a former pharma division head with strong domain knowledge but limited AI fluency; (3) a 'translator' executive who has shipped AI products in adjacent industries and is willing to defer technical depth to a strong technical lead. The board is split. Which framework combination BEST informs the recommendation?",
+          "options": [
+            "Task/Role/Job/Authority/Profile (S8) + AI team role map: the CAIO ROLE owns AI capability AT the strategic level (decision rights over portfolio and direction), the JOB is the formal C-suite position, and the PROFILE must match. The translator (option 3) has the rare profile that integrates business + technical fluency without needing personal mastery of either, which the role requires; the academic lacks integration with business decisions; the division head lacks the technical credibility to govern the AI Architect / MLOps roles beneath. Pair with Bouquet et al. four paths (S6/S7) to argue the choice strategically: the translator can navigate Make/Buy/Partner trade-offs, which a pure researcher or pure division head cannot.",
+            "Transformational leadership: pick the candidate with the most charisma and vision; the technical details can be delegated.",
+            "Servant leadership: pick the division head — they will best understand and serve the existing pharma staff.",
+            "Job Characteristics Model: pick the academic — academic work has the highest skill variety and task identity, predicting the highest motivation in the role.",
+            "Cognitive surrender risk: pick the translator because they will not be tempted to over-rely on AI in decisions; the academic and the division head both lack this immunity."
+          ],
+          "answer": 0,
+          "rationale": "The S8 distinction (role × authority × profile) is the right diagnostic frame; the AI team role map identifies the CAIO's structural position. Bouquet et al. adds the strategic-fit lens. Leadership-style answers (B/C) are seductive but don't address the structural fit question. JCM and cognitive surrender (D/E) are unrelated to the hiring criterion."
+        },
+        {
+          "q": "A regulator is drafting guidance for AI-enabled robo-advisers in retail banking. Two competing proposals are on the table: (a) require every robo-adviser to have a human-in-the-loop sign off on each recommendation; (b) require a 'human-on-the-loop' design where humans monitor in aggregate, with automated guardrails enforcing real-time rules and audit logs reviewed monthly. The industry lobby argues (a) makes the product economically unviable; consumer groups argue (b) is just rebranded automation. The regulator asks for a framework-anchored recommendation.",
+          "options": [
+            "Mandate (a) HITL: this maximises human oversight and minimises cognitive surrender; volume cost is a price worth paying for safety.",
+            "Mandate (b) HOTL: scalability is the deciding criterion; consumer groups overstate the risk.",
+            "Mandate neither; leave it to firms to choose based on their risk appetite; the market will discipline poor designs.",
+            "A tiered hybrid: HITL for high-impact recommendations crossing pre-defined thresholds (large allocation changes, retirement-account moves, leverage requests); HOTL for routine rebalancing. The framework anchor is RACI plus its breakdown at AI scale (S17): A must be a singular human role at the firm regardless of HITL or HOTL — and the design choice between the two should follow whether C and I can practically operate at the volume of decisions involved. Combine with the EU AI Act's high-risk treatment of credit/finance services to set the floor of obligations, Floridi & Cowls' explicability to demand audit logging for both tiers, and Kahneman/cognitive-surrender literature to argue that the HITL portion be designed for active System-2 deliberation (constructive friction, confidence intervals, explainable reasons) rather than passive sign-off.",
+            "Defer the decision to a future regulation cycle; the technology is changing too fast to legislate now."
+          ],
+          "answer": 3,
+          "rationale": "Multi-framework synthesis that mirrors the scenario MCQ style of the mock exam: a tiered design grounded in RACI-at-scale (A stays human; C/I feasibility determines HITL vs HOTL); AI Act sets the floor; explicability mandates audit; cognitive surrender shapes how HITL is operationally designed. The single-lens answers all fail because the regulator's question requires integration."
+        },
+        {
+          "q": "Three months after a major manufacturer rolls out a GenAI assistant to its 4,000 engineers, internal data shows: (i) 35% of engineers use it daily; (ii) the engineers who use it most have shortened their average task time by 28%; (iii) a vocal minority (~12%) reports feeling 'replaced' and refuses to use it; (iv) two senior engineers have quit citing 'loss of meaning'; (v) one near-miss incident traced to an engineer accepting a GenAI suggestion without checking. The CTO must report to the board. Which framework combination produces the BEST report?",
+          "options": [
+            "Report only the productivity gain (ii) and the adoption rate (i); the other data points are anecdotal.",
+            "Frame the rollout as a failure and pause it; (iv) and (v) prove the costs outweigh the benefits.",
+            "Pajuoja (ManCo) four factor families to organise the report by ORGANISATION, INDIVIDUAL, WORK CONTEXT, and TOOL — each data point maps cleanly. Then layer: the productivity gain (ii) is the headline, but the psychological contract (Rousseau 1995) frame explains (iii) and (iv) — implicit promises about what the engineering job entails have been violated; SDT (Deci & Ryan) names the mechanism — autonomy and competence needs are unmet for the resisters; cognitive surrender (S12) explains the near-miss (v) and informs an oversight redesign. The recommendation is not pause but REDESIGN: keep the productivity gains by restoring meaningful authorship for resisters and inserting deliberation friction at high-consequence decision points.",
+            "JD-R model alone: classify every data point as either a demand or a resource; this single-lens analysis is sufficient.",
+            "Kotter's 8 steps: re-run the change effort from step 1 (urgency), addressing every issue mechanically; the data points are change-management failures."
+          ],
+          "answer": 2,
+          "rationale": "Mock-exam-style synthesis: multiple data points → multiple frameworks integrated. Pajuoja for structure, psychological contract + SDT for the (iii)/(iv) mechanism, cognitive surrender for (v). The decision (REDESIGN, not pause) matters as much as the diagnosis — single-frame answers (D/E) miss the multidimensional pattern."
+        },
+        {
+          "q": "A national rail operator wants to use AI to optimise crew scheduling. The system will be deployed across 6 regions, each with its own union, regulator, and operating practice. The Chief Operating Officer proposes 'centralised governance for consistency, federated tuning for local fit, embedded guardrails for real-time safety' — and asks how to make accountability work across the three layers. Which RACI design BEST fits, and what is the single most important risk to flag?",
+          "options": [
+            "Three separate RACI matrices (one per governance layer): each layer has its own R/A/C/I. A clean separation prevents confusion.",
+            "A single RACI matrix with the COO as A for everything: simplicity and clear single accountability outweigh the volume problem.",
+            "One RACI per decision TYPE not per layer: strategic decisions (deploy or pause a region) have the Group COO as A; structural decisions (regional tuning of thresholds) have the regional GM as A; operational decisions (real-time schedule changes) have the embedded guardrails as the executor, with the regional Safety Director as A for outcomes. The most important risk to flag is the SCALE BREAKDOWN of C and I at the operational layer (S17 / Air Canada lesson): at the volume of real-time decisions, no one will actually be consulted or informed about most events — so the operational layer must be designed with automated logging + monthly aggregate audits feeding back to regional safety directors, otherwise problems will accumulate undetected exactly as the Air Canada case predicts.",
+            "No RACI is needed; the embedded guardrails ARE the governance and humans can be removed from the loop for efficiency.",
+            "Use RACI only for the strategic layer and rely on industry standards for the rest; over-formalising structural and operational layers slows the rollout."
+          ],
+          "answer": 2,
+          "rationale": "Synthesis question: A is singular per decision type (not per layer), and the most important S17 lesson is that RACI's C and I roles collapse at scale unless explicitly redesigned with audit feedback loops. The Air Canada case is the canonical illustration and the question rewards naming it. The other options either oversimplify (B, D, E) or fragment governance incoherently (A)."
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<div class="app">
+
+  <!-- ============ HOME SCREEN ============ -->
+  <section id="home" class="screen active">
+    <div class="topbar">
+      <div>
+        <h1 id="subject-title">MCQ Trainer</h1>
+        <div class="sub" id="subject-sub"></div>
+      </div>
+    </div>
+
+    <div class="medal-shelf">
+      <h2>Your medals</h2>
+      <div class="medal-row" id="medal-shelf"></div>
+    </div>
+
+    <div class="tile-grid" id="block-grid"></div>
+  </section>
+
+  <!-- ============ QUIZ SCREEN ============ -->
+  <section id="quiz" class="screen">
+    <div class="topbar">
+      <div>
+        <h1 id="quiz-title">Quiz</h1>
+        <div class="sub" id="quiz-sub"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="timer" id="timer" title="Session timer (pauses on break)"><span class="dot"></span><span id="timer-text">00:00</span></div>
+        <button class="home-btn" id="quit-btn">Quit</button>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-meta">
+        <span id="progress-text">0 / 0 mastered</span>
+        <span id="streak-text">Streak: 0</span>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="q-text" id="q-text">…</div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback">
+        <div class="verdict" id="verdict"></div>
+        <div class="rationale" id="rationale"></div>
+        <button class="next-btn" id="next-btn">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ END SCREEN ============ -->
+  <section id="end" class="screen">
+    <div class="end-card">
+      <h2 id="end-title">All mastered! 🎉</h2>
+      <div class="sub" id="end-sub">Session summary</div>
+      <div class="end-stats">
+        <div class="end-stat"><div class="v" id="stat-answered">0</div><div class="l">Answered</div></div>
+        <div class="end-stat"><div class="v" id="stat-correct">0</div><div class="l">Correct first try</div></div>
+        <div class="end-stat"><div class="v" id="stat-accuracy">0%</div><div class="l">Accuracy</div></div>
+        <div class="end-stat"><div class="v" id="stat-time">00:00</div><div class="l">Total time</div></div>
+      </div>
+      <div class="sub" id="stat-avg-time" style="margin-top:-12px;margin-bottom:18px;font-size:.82rem"></div>
+      <div class="earned-medals" id="earned-medals"></div>
+      <div class="end-actions">
+        <button class="primary" id="end-again">Play again</button>
+        <button class="ghost" id="end-home">Home</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ BREAK MODAL ============ -->
+<div class="modal-backdrop" id="break-modal">
+  <div class="modal">
+    <h3>Take a breath 🌿</h3>
+    <p id="break-text">You've answered 7 questions. Keep going?</p>
+    <div class="row">
+      <button class="primary" id="break-continue">Continue</button>
+      <button class="ghost" id="break-stop">Stop for now</button>
+    </div>
+  </div>
+</div>
+
+<script>
+//================================================================
+// MCQ Trainer — engine
+//================================================================
+const DATA = JSON.parse(document.getElementById('quiz-data').textContent);
+const STORAGE_KEY = 'mcq_' + DATA.subjectId + '_progress';
+
+// ---- Medals catalogue ----
+const MEDAL_DEFS = {
+  finished:  { label: 'Block finished', ic: '🥉', cls: 'bronze' },
+  threeX:    { label: '3× completed',   ic: '🥈', cls: 'silver' },
+  perfect:   { label: 'Perfect run',    ic: '🥇', cls: '' },
+};
+
+// ---- Progress state (persisted) ----
+function loadProgress(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveProgress(p){ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+function blockState(p, id){
+  if (!p[id]) p[id] = { completions: 0, perfectRuns: 0, medals: [] };
+  return p[id];
+}
+
+// ---- Render: home ----
+function renderHome(){
+  document.getElementById('subject-title').textContent = DATA.subject + ' — MCQ Trainer';
+  const total = DATA.blocks.reduce((n,b)=>n+b.questions.length, 0);
+  document.getElementById('subject-sub').textContent = `${total} questions across ${DATA.blocks.length} blocks`;
+
+  const prog = loadProgress();
+
+  // medal shelf — aggregate across blocks
+  const shelf = document.getElementById('medal-shelf');
+  shelf.innerHTML = '';
+  const totalMedals = { finished:0, threeX:0, perfect:0 };
+  DATA.blocks.forEach(b => {
+    const s = blockState(prog, b.id);
+    s.medals.forEach(m => totalMedals[m] !== undefined && totalMedals[m]++);
+  });
+  Object.entries(MEDAL_DEFS).forEach(([k, def]) => {
+    const count = totalMedals[k];
+    const el = document.createElement('span');
+    el.className = 'medal ' + def.cls + (count === 0 ? ' empty' : '');
+    el.innerHTML = `<span class="ic">${def.ic}</span>${def.label} × ${count}`;
+    shelf.appendChild(el);
+  });
+
+  // tiles
+  const grid = document.getElementById('block-grid');
+  grid.innerHTML = '';
+  DATA.blocks.forEach(b => {
+    const s = blockState(prog, b.id);
+    const btn = document.createElement('button');
+    btn.className = 'tile';
+    btn.innerHTML = `
+      <div class="tile-title">${escapeHtml(b.title)}</div>
+      <div class="tile-meta">
+        <span>${b.questions.length} questions</span>
+        <span>Completed ${s.completions}×</span>
+      </div>
+      <div class="tile-medals">${renderMedals(s.medals)}</div>
+    `;
+    btn.onclick = () => startQuiz([b], b.title);
+    grid.appendChild(btn);
+  });
+
+  // mixed tile
+  const mixed = document.createElement('button');
+  mixed.className = 'tile mixed';
+  mixed.innerHTML = `
+    <div class="tile-title">🎲 Mix all blocks</div>
+    <div class="tile-meta">
+      <span>${DATA.blocks.reduce((n,b)=>n+b.questions.length,0)} questions, shuffled</span>
+      <span>Exam-style</span>
+    </div>
+    <div class="tile-medals"></div>
+  `;
+  mixed.onclick = () => startQuiz(DATA.blocks, 'Mixed — all blocks');
+  grid.appendChild(mixed);
+}
+
+function renderMedals(list){
+  if (!list || list.length === 0) return '';
+  // dedupe display, but show counts
+  const counts = {};
+  list.forEach(m => counts[m] = (counts[m] || 0) + 1);
+  return Object.entries(counts).map(([k,n]) => {
+    const def = MEDAL_DEFS[k];
+    if (!def) return '';
+    return `<span class="medal ${def.cls}"><span class="ic">${def.ic}</span>${def.label}${n>1 ? ' ×'+n : ''}</span>`;
+  }).join('');
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ---- Quiz state ----
+let quizState = null;
+
+// ---- Session timer (pauses on break modal) ----
+const timer = {
+  startedAt: 0,       // ms epoch at last resume
+  accumulated: 0,     // ms accumulated across paused segments
+  intervalId: null,
+  running: false,
+  reset(){
+    this.stop();
+    this.startedAt = 0;
+    this.accumulated = 0;
+    renderTimer(0);
+  },
+  start(){
+    if (this.running) return;
+    this.startedAt = Date.now();
+    this.running = true;
+    document.getElementById('timer').classList.remove('paused');
+    this.intervalId = setInterval(() => renderTimer(this.elapsedMs()), 1000);
+    renderTimer(this.elapsedMs());
+  },
+  pause(){
+    if (!this.running) return;
+    this.accumulated += Date.now() - this.startedAt;
+    this.running = false;
+    clearInterval(this.intervalId);
+    this.intervalId = null;
+    document.getElementById('timer').classList.add('paused');
+  },
+  stop(){
+    if (this.running){
+      this.accumulated += Date.now() - this.startedAt;
+      this.running = false;
+    }
+    clearInterval(this.intervalId);
+    this.intervalId = null;
+  },
+  elapsedMs(){
+    return this.accumulated + (this.running ? Date.now() - this.startedAt : 0);
+  },
+};
+
+function formatTime(ms){
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function renderTimer(ms){
+  document.getElementById('timer-text').textContent = formatTime(ms);
+}
+
+function startQuiz(blocks, title){
+  // Build queue. For each question keep meta about which block it came from.
+  const queue = [];
+  blocks.forEach(b => {
+    b.questions.forEach((q, i) => {
+      queue.push({
+        blockId: b.id,
+        blockTitle: b.title,
+        qid: b.id + '_' + i,
+        q: q.q,
+        options: q.options,
+        answer: q.answer,
+        rationale: q.rationale,
+        mastered: false,
+      });
+    });
+  });
+  shuffle(queue);
+
+  quizState = {
+    title,
+    blocks,         // blocks involved (for medal awarding)
+    queue,
+    total: queue.length,
+    sessionAnswered: 0,     // total questions answered this session
+    sessionCorrect: 0,      // correct-on-first-try this session
+    sessionWrongAny: false, // was there any wrong answer this session?
+    streak: 0,              // current correct streak
+    answeredSinceBreak: 0,  // counts toward the 7-question break
+    seenFirstTry: {},       // qid -> bool (whether this question was answered correctly on first try)
+  };
+
+  showScreen('quiz');
+  document.getElementById('quiz-title').textContent = title;
+  document.getElementById('quiz-sub').textContent = `${queue.length} questions to master`;
+  timer.reset();
+  timer.start();
+  nextQuestion();
+}
+
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+}
+
+function nextQuestion(){
+  if (quizState.queue.length === 0){
+    finishQuiz(true);
+    return;
+  }
+  const q = quizState.queue[0];
+  renderQuestion(q);
+  updateProgressBar();
+}
+
+function renderQuestion(q){
+  document.getElementById('q-text').textContent = q.q;
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = '';
+  const letters = ['A','B','C','D','E','F'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="letter">${letters[i]}</span>${escapeHtml(opt)}`;
+    btn.onclick = () => onAnswer(i);
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('feedback').classList.remove('show', 'good', 'bad');
+}
+
+function onAnswer(picked){
+  const q = quizState.queue[0];
+  const correct = picked === q.answer;
+  const opts = document.querySelectorAll('#options .opt');
+  opts.forEach((b, i) => {
+    b.disabled = true;
+    if (i === q.answer) b.classList.add('correct');
+    if (i === picked && !correct) b.classList.add('wrong');
+  });
+
+  quizState.sessionAnswered++;
+  quizState.answeredSinceBreak++;
+
+  // track first-try correctness for perfect-run medal
+  const firstTry = !(q.qid in quizState.seenFirstTry);
+  if (firstTry) quizState.seenFirstTry[q.qid] = correct;
+
+  if (correct){
+    quizState.streak++;
+    if (firstTry) quizState.sessionCorrect++;
+    flashScreen('good');
+    showFeedback(true, q.rationale);
+    // mastered (1-correct rule) — remove from queue
+    quizState.queue.shift();
+    // auto-advance on correct after a short pause
+    setTimeout(() => {
+      if (!quizState) return;
+      handlePostAnswer();
+    }, 1100);
+  } else {
+    quizState.streak = 0;
+    quizState.sessionWrongAny = true;
+    flashScreen('bad');
+    showFeedback(false, q.rationale);
+    // Wrong → re-queue 2-4 slots later
+    const removed = quizState.queue.shift();
+    const offset = Math.min(quizState.queue.length, 2 + Math.floor(Math.random() * 3));
+    quizState.queue.splice(offset, 0, removed);
+    // Wait for user to click Next on wrong answers
+    document.getElementById('next-btn').onclick = handlePostAnswer;
+  }
+  updateProgressBar();
+}
+
+function flashScreen(kind){
+  document.body.classList.remove('flash-good', 'flash-bad');
+  // force reflow so animation restarts
+  void document.body.offsetWidth;
+  document.body.classList.add(kind === 'good' ? 'flash-good' : 'flash-bad');
+  setTimeout(() => document.body.classList.remove('flash-good', 'flash-bad'), 600);
+}
+
+function showFeedback(good, rationale){
+  const fb = document.getElementById('feedback');
+  fb.classList.add('show', good ? 'good' : 'bad');
+  document.getElementById('verdict').textContent = good ? '✓ Correct!' : '✗ Not quite';
+  document.getElementById('rationale').textContent = rationale || '';
+  document.getElementById('next-btn').style.display = good ? 'none' : 'inline-block';
+}
+
+function handlePostAnswer(){
+  // Check break (every 7 questions)
+  if (quizState.answeredSinceBreak >= 7 && quizState.queue.length > 0){
+    quizState.answeredSinceBreak = 0;
+    showBreakModal();
+    return;
+  }
+  nextQuestion();
+}
+
+function showBreakModal(){
+  timer.pause();
+  const modal = document.getElementById('break-modal');
+  document.getElementById('break-text').textContent =
+    `You've answered ${quizState.sessionAnswered} questions in ${formatTime(timer.elapsedMs())}. ${quizState.queue.length} left in the pool — keep going?`;
+  modal.classList.add('show');
+}
+
+document.getElementById('break-continue').onclick = () => {
+  document.getElementById('break-modal').classList.remove('show');
+  timer.start();
+  nextQuestion();
+};
+document.getElementById('break-stop').onclick = () => {
+  document.getElementById('break-modal').classList.remove('show');
+  finishQuiz(false);
+};
+
+document.getElementById('quit-btn').onclick = () => {
+  if (!quizState || confirm('Quit this session? Progress for this session will be lost.')){
+    timer.stop();
+    quizState = null;
+    showScreen('home');
+    renderHome();
+  }
+};
+
+function updateProgressBar(){
+  const mastered = quizState.total - quizState.queue.length;
+  const pct = Math.round((mastered / quizState.total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${mastered} / ${quizState.total} mastered`;
+  document.getElementById('streak-text').textContent = `Streak: ${quizState.streak}`;
+}
+
+function finishQuiz(completed){
+  if (!quizState) return;
+  timer.stop();
+  const earned = [];
+
+  // Award medals ONLY if the session actually completed all questions
+  // AND covered exactly one block (mixed mode does not award per-block medals).
+  if (completed && quizState.blocks.length === 1){
+    const block = quizState.blocks[0];
+    const prog = loadProgress();
+    const s = blockState(prog, block.id);
+    s.completions++;
+    // first-time finishing this block
+    if (!s.medals.includes('finished')){
+      s.medals.push('finished'); earned.push('finished');
+    }
+    // 3× completed
+    if (s.completions >= 3 && !s.medals.includes('threeX')){
+      s.medals.push('threeX'); earned.push('threeX');
+    }
+    // perfect run (no wrong answers this whole session)
+    if (!quizState.sessionWrongAny){
+      s.perfectRuns++;
+      // award a perfect medal every time, so it stacks (counts how many perfect runs)
+      s.medals.push('perfect'); earned.push('perfect');
+    }
+    saveProgress(prog);
+  }
+
+  // Stats
+  const answered = quizState.sessionAnswered;
+  const correct = quizState.sessionCorrect;
+  const accuracy = answered ? Math.round((correct / answered) * 100) : 0;
+
+  document.getElementById('end-title').textContent = completed ? 'All mastered! 🎉' : 'Session stopped';
+  document.getElementById('end-sub').textContent = completed
+    ? quizState.title
+    : `${quizState.queue.length} questions still unmastered in ${quizState.title}`;
+  const totalMs = timer.elapsedMs();
+  document.getElementById('stat-answered').textContent = answered;
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-accuracy').textContent = accuracy + '%';
+  document.getElementById('stat-time').textContent = formatTime(totalMs);
+  const avgSec = answered ? Math.round((totalMs / 1000) / answered) : 0;
+  document.getElementById('stat-avg-time').textContent =
+    answered ? `Average ${avgSec}s per question` : '';
+
+  const earnedEl = document.getElementById('earned-medals');
+  earnedEl.innerHTML = earned.map(m => {
+    const def = MEDAL_DEFS[m];
+    return `<span class="medal ${def.cls}"><span class="ic">${def.ic}</span>New medal: ${def.label}</span>`;
+  }).join('');
+
+  showScreen('end');
+}
+
+document.getElementById('end-again').onclick = () => {
+  if (!quizState) { showScreen('home'); renderHome(); return; }
+  startQuiz(quizState.blocks, quizState.title);
+};
+document.getElementById('end-home').onclick = () => {
+  quizState = null;
+  showScreen('home');
+  renderHome();
+};
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+// ---- boot ----
+renderHome();
+</script>
+
+</body>
+</html>
